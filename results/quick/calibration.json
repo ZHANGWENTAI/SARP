@@ -1,0 +1,67 @@
+{
+  "heterogeneous": {
+    "calibration_seeds": [
+      101,
+      102,
+      103
+    ],
+    "margin_limit": 0.0028,
+    "signal": [
+      0.0074652945523334185,
+      0.008483291563887602,
+      0.10685350324339239,
+      0.3870070212912976,
+      0.1581932842113098,
+      0.26611448721477665,
+      0.05423313614275144,
+      0.004438550191678025,
+      0.0018438470453476757,
+      0.0018017763139609334,
+      0.0017891394845543542,
+      0.001776668744710242
+    ],
+    "uniform": [
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14
+    ],
+    "adaptive": [
+      2,
+      3,
+      11,
+      16,
+      14,
+      16,
+      8,
+      2,
+      1,
+      1,
+      1,
+      1
+    ],
+    "uniform_calibration_rmse": 0.0026336113164204073,
+    "adaptive_calibration_rmse": 0.0027932565130774265,
+    "calibration_evaluations": 96,
+    "offline_calibration_excluded_from_online_timing": true,
+    "offline_wall_ms": 49.463375,
+    "config": {
+      "frames": 4,
+      "height": 4,
+      "width": 4,
+      "channels": 12,
+      "steps": 12,
+      "block_size": 4,
+      "quality_limit": 0.004,
+      "heterogeneous": true
+    }
+  }
+}

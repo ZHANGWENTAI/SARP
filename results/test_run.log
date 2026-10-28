@@ -1,0 +1,22 @@
+test_cross_block_edit_falls_back (test_adapters.DynamicTests.test_cross_block_edit_falls_back) ... ok
+test_disconnection_and_reconnection (test_adapters.DynamicTests.test_disconnection_and_reconnection) ... ok
+test_mixed_edits_against_independent_floyd_warshall (test_adapters.DynamicTests.test_mixed_edits_against_independent_floyd_warshall) ... ok
+test_gradient_against_finite_differences (test_adapters.LogicalTests.test_gradient_against_finite_differences) ... ok
+test_incremental_combinations_and_parameter_invalidation (test_adapters.LogicalTests.test_incremental_combinations_and_parameter_invalidation) ... ok
+test_merged_forward_backward_and_multistep_update (test_adapters.LogicalTests.test_merged_forward_backward_and_multistep_update) ... ok
+test_training_targets_follow_kg_set_semantics (test_adapters.LogicalTests.test_training_targets_follow_kg_set_semantics) ... ok
+test_full_block_attention_matches_direct_attention (test_adapters.VideoTests.test_full_block_attention_matches_direct_attention) ... ok
+test_quality_check_and_runtime_fallback (test_adapters.VideoTests.test_quality_check_and_runtime_fallback) ... ok
+test_budget_conservation_bounds_and_determinism (test_core.CoreTests.test_budget_conservation_bounds_and_determinism) ... ok
+test_candidate_plans_share_structural_analysis (test_core.CoreTests.test_candidate_plans_share_structural_analysis) ... ok
+test_dependency_invalidation_handles_cycles (test_core.CoreTests.test_dependency_invalidation_handles_cycles) ... ok
+test_exact_tasks_reject_approximate_budgets (test_core.CoreTests.test_exact_tasks_reject_approximate_budgets) ... ok
+test_fallback_when_transform_overhead_exceeds_gain (test_core.CoreTests.test_fallback_when_transform_overhead_exceeds_gain) ... ok
+test_scope_and_merge_are_composable (test_core.CoreTests.test_scope_and_merge_are_composable) ... ok
+test_tampered_budget_rejected_by_runtime_validation (test_core.CoreTests.test_tampered_budget_rejected_by_runtime_validation) ... ok
+test_unknown_or_missing_dependency_rejected (test_core.CoreTests.test_unknown_or_missing_dependency_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.370s
+
+OK

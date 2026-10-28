@@ -1,0 +1,283 @@
+{
+  "task": "conditional_video_tensor_denoising",
+  "domain": "video",
+  "cyclic": false,
+  "units": [
+    {
+      "uid": 0,
+      "op": "denoising_step",
+      "deps": [],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    },
+    {
+      "uid": 1,
+      "op": "denoising_step",
+      "deps": [
+        0
+      ],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    },
+    {
+      "uid": 2,
+      "op": "denoising_step",
+      "deps": [
+        1
+      ],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    },
+    {
+      "uid": 3,
+      "op": "denoising_step",
+      "deps": [
+        2
+      ],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    },
+    {
+      "uid": 4,
+      "op": "denoising_step",
+      "deps": [
+        3
+      ],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    },
+    {
+      "uid": 5,
+      "op": "denoising_step",
+      "deps": [
+        4
+      ],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    },
+    {
+      "uid": 6,
+      "op": "denoising_step",
+      "deps": [
+        5
+      ],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    },
+    {
+      "uid": 7,
+      "op": "denoising_step",
+      "deps": [
+        6
+      ],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    },
+    {
+      "uid": 8,
+      "op": "denoising_step",
+      "deps": [
+        7
+      ],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    },
+    {
+      "uid": 9,
+      "op": "denoising_step",
+      "deps": [
+        8
+      ],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    },
+    {
+      "uid": 10,
+      "op": "denoising_step",
+      "deps": [
+        9
+      ],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    },
+    {
+      "uid": 11,
+      "op": "denoising_step",
+      "deps": [
+        10
+      ],
+      "parameters": [],
+      "work": 274944.0,
+      "shareable": false
+    }
+  ],
+  "range_certificate": null,
+  "required": null,
+  "constraint": "held_out_latent_rmse",
+  "selected": "budget",
+  "candidate_plans": [
+    {
+      "name": "reference",
+      "active_units": 12,
+      "execution_groups": 12,
+      "budgets": [
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "transforms": [],
+      "kernel_work": 3299328.0,
+      "organization_work": 0.0,
+      "estimated_work": 3299328.0,
+      "active": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "groups": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ]
+      ]
+    },
+    {
+      "name": "budget",
+      "active_units": 12,
+      "execution_groups": 12,
+      "budgets": [
+        2,
+        3,
+        11,
+        16,
+        14,
+        16,
+        8,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "transforms": [
+        "budget"
+      ],
+      "kernel_work": 2230272.0,
+      "organization_work": 0.0,
+      "estimated_work": 2230272.0,
+      "active": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "groups": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "seed": 43,
+  "config": {
+    "frames": 4,
+    "height": 4,
+    "width": 4,
+    "channels": 12,
+    "steps": 12,
+    "block_size": 4,
+    "quality_limit": 0.004,
+    "heterogeneous": false
+  },
+  "calibration_case": "homogeneous"
+}

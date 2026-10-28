@@ -1,0 +1,11 @@
+{
+  "structure_aware/__init__.py": "7f8d3255dddbd78e1636df4e8e32314f43bbcce92b8d098320d5ced83befa861",
+  "structure_aware/adapters/__init__.py": "0564017cfd8a26f55956c53f3fa8f1521f0673c4960154d371732a333ca7e48e",
+  "structure_aware/adapters/dynamic.py": "d3741cd82650c4587cd864b485c8969b80ab3736b6a42dcff2c4aece85a0f85e",
+  "structure_aware/adapters/logical.py": "21159d9e9ed1aa4e2a57806dd1d0eed94d389775d52689917042410a1e10630d",
+  "structure_aware/adapters/video.py": "fe0f27cd740ccdd6a3891cc29cff029a350771a305381de3ba89003e9d2898fb",
+  "structure_aware/audit.py": "6c39734a202304e4769b507daddb75a79059dcafcb62bc2d9e96fd509ed5fe8b",
+  "structure_aware/core.py": "7a12c738d94670f3bef175db6dd072d1b0e6bccb99dfc89063df6db09ce68353",
+  "structure_aware/experiments.py": "9f0e13491c5135cee30b366e9c19f55cbe619d0db2ffc7cd91d085ae3f621f04",
+  "structure_aware/report.py": "410ce5d93e0bcdc7c26774ed740deb694c1906c284b930583fe7ffd8d033d066"
+}

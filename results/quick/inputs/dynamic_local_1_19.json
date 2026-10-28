@@ -1,0 +1,61 @@
+{
+  "seed": 19,
+  "case": {
+    "name": "local_1",
+    "blocks": 8,
+    "block_size": 24,
+    "touched": 1
+  },
+  "updates": [
+    [
+      "delete",
+      101,
+      103
+    ],
+    [
+      "delete",
+      84,
+      90
+    ],
+    [
+      "delete",
+      95,
+      103
+    ],
+    [
+      "delete",
+      84,
+      86
+    ],
+    [
+      "insert",
+      80,
+      97
+    ],
+    [
+      "insert",
+      85,
+      101
+    ],
+    [
+      "insert",
+      91,
+      92
+    ],
+    [
+      "insert",
+      91,
+      99
+    ]
+  ],
+  "roots": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "status": "complete",
+  "started_utc": "2026-10-28T16:29:35.077514+00:00",
+  "records": 38,
+  "config_sha256": "672fd04886766d45a96dabbd054d012415429271eaf8705bfe7f57bb0d2e8aae",
+  "completed_utc": "2026-10-28T16:29:35.406800+00:00",
+  "all_validated": true,
+  "raw_sha256": "132e5a6530a3d901c2638faa094cb5dc9fc126f7f43d2042a34aa796cf59142d"
+}
