@@ -10,19 +10,19 @@
  \bibliographystyle{gbt7714-numerical}
 --- /dev/null
 +++ b/Chapter/Chapter_framework.tex
-@@ -0,0 +1,259 @@
+@@ -0,0 +1,261 @@
 +\chapter{结构感知高效推理的形式化框架和原型验证}
 +\label{chap:formal_framework_prototype}
 +
 +\section{本章引言}
 +
-+第三至第五章分别从拓扑、逻辑和时序结构出发，研究动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频 DiT 稀疏注意力推理。三类任务的计算对象和执行约束不同，但均需要依据结构信息判断计算的必要性、可复用性与收益贡献。将这些判断转化为共同的计算描述和执行机制，有助于明确三项研究之间的内在联系，并考察结构感知方法能否在统一的工程实现中得到验证。
++结构感知高效推理的共同问题，是如何依据依赖关系和单元属性，确定必要计算、组织可复用计算并分配计算预算。第三至第五章分别以拓扑、逻辑和时序结构回答了这一问题。本章建立共同的计算描述，将三项研究中的范围收缩、节点合并和预算分配纳入同一形式化框架，并通过公共执行机制实现多领域适配与变换组合。
 +
-+本章首先建立结构感知高效推理的形式化框架，将三类结构表示为推理依赖图，以计算范围、节点分组和计算预算刻画执行方案，并给出任务约束下的统一代价目标。随后实现共享任务表示、执行规划、领域适配和结果验证的工程原型，在三类构造任务上检验执行结果与计算收益，并通过增量逻辑查询考察范围收缩与节点合并的组合关系。最后结合实验结果讨论形式化框架的适用边界。
++形式化框架以推理依赖图描述三类结构，以计算范围、节点分组和计算预算刻画执行方案，并在正确性或质量约束下统一比较计算代价。工程原型将这些对象实现为共享任务表示、公共规划器和领域适配器，使不同变换能够作用于同一计算图。增量逻辑查询实验中，范围收缩与节点合并共同将代表性条件下的加权计算代价降低89.4\%，并保持查询输出一致。三类任务的验证进一步说明，拓扑局部性、逻辑共性和阶段需求差异均可通过这一执行机制转化为计算收益。
 +
 +\section{形式化框架}
 +\label{sec:formal_framework}
-+本节对“结构感知的高效推理方法”做了形式化。首先将拓扑、逻辑和时序结构统一表示为推理依赖图，然后建立总计算代价模型，最后刻画范围收缩、节点合并与预算分配三类优化策略，并归纳其统一优化目标。
++本节建立结构感知高效推理的形式化框架。首先将拓扑、逻辑和时序结构统一表示为推理依赖图，然后建立总计算代价模型，最后刻画范围收缩、节点合并与预算分配三类优化策略，给出任务约束下的统一优化目标。
 +\subsection{推理依赖图与计算代价}
 +
 +为统一描述拓扑、逻辑和时序结构，将推理单元集合记为 $\mathcal{U}_{\mathrm{s}}$，单元之间的依赖关系集合记为 $\mathcal{E}_{\mathrm{s}}$，由二者构成的推理依赖图记为 $\mathcal{G}_{\mathrm{s}}$，即
@@ -191,6 +191,8 @@
 +\section{原型验证与结果分析}
 +\label{sec:prototype_evaluation}
 +
++本节验证形式化框架的两项核心能力：以共同的任务表示和规划流程支撑三类结构感知机制，以及在同一计算图中组合不同执行变换。组合消融实验识别范围收缩与节点合并各自及共同产生的收益，三类任务对照检验结构特征与计算收益之间的关系，耗时分解则为执行方案选择提供依据。
++
 +\subsection{实验设置与评价方法}
 +
 +实验采用 CPU 仿真，运行环境为 ARM 体系结构、18个逻辑处理器的 macOS 系统，使用 Python~3.12.14 和 NumPy~2.3.5，并将数值库的线程数限制为1。所有输入均由固定配置构造，输入随机种子为7、19、31、43和59。每种条件预热2次后计时7次，执行方案顺序按种子确定性打乱。表~\ref{tab:prototype_workloads}~概括各类输入和对照设置，共形成330条条件记录和2310次计时工作负载运行。
@@ -220,56 +222,56 @@
 +
 +加权计算代价依据各任务的算子权重和结构组织计数计算，实际执行记录还包括顶点访问、边检查、算子调用和注意力交互对数。端到端耗时包含适配、规划、方案校验、内核执行及训练参数更新；结果对照验证单独计时。初始索引、增量求值的初始缓存及离线预算校准作为预处理，校准耗时另行保存。每个输入种子的重复耗时先取均值，再计算同一种子下的加速比，最后对5个种子报告均值与样本标准差。
 +
++\subsection{公共执行机制与组合变换验证}
++
++组合实验通过单一变换与组合方案的对照识别互补收益。实验固定模型参数，改变已缓存查询批次的部分输入，由公共依赖传播识别失效闭包，范围收缩据此确定重算对象，再由节点合并识别该范围内的公共子表达式。两类变换共享同一任务表示，前者决定后者需要处理的节点集合。缓存以输入版本和参数快照为有效性条件，训练阶段保留全部梯度贡献。
++
++组合执行同时消除了范围外重算和范围内重复计算。表~\ref{tab:prototype_composition}~中，8组公共前缀、12.5\%查询输入变化时，完整任务平均包含约1802个计算单元；范围收缩将重算对象确定为约222个，节点合并进一步将这些对象组织为约100组执行。与之对照，在完整范围内单独合并形成约544组计算。仅范围收缩、仅节点合并与组合执行的加权代价分别下降82.1\%、73.7\%和89.4\%，查询输出全部一致，表明统一表示能够支撑具有互补收益的变换组合。
++
++\input{structure_aware_prototype/results/full/chapter_composition.tex}
++
++公共规划器还可依据输入变化选择相应的执行方案。在8组公共前缀、50\%输入变化时，组合执行仍获得82.6\%的代价下降；所有输入变化时，规划器选择节点合并，利用逻辑共性减少重复执行；输入不变时，则选择直接复用缓存的范围方案。这些方案均由同一结构描述和代价比较过程产生，体现了形式化框架对不同任务状态的适配能力。
++
 +\subsection{三类任务的执行结果与结构收益}
 +
-+表~\ref{tab:prototype_simulation_results}~给出代表性构造输入上的结果。全部条件均通过对应的结果约束检查；动态图距离与完整重建一致，逻辑训练的损失、梯度和参数更新最大偏差小于$5.0\times10^{-16}$，常规视频输入的阶段预算输出满足0.004的潜变量 RMSE 阈值。不同任务的加权代价分别在各自的计算口径内比较。
++公共执行机制在三类构造任务上均保持相应的结果约束，并将结构差异转化为计算收益。表~\ref{tab:prototype_simulation_results}~中，动态图维护、逻辑查询训练和视频张量去噪的加权代价分别下降71.9\%、76.1\%和32.4\%，对应端到端加速比分别为1.88、1.90和1.05。动态图距离与完整重建一致，逻辑训练的损失、梯度和参数更新最大偏差小于$5.0\times10^{-16}$，常规视频输入满足0.004的潜变量 RMSE 阈值；各任务的计算代价均按本领域口径比较。
 +
 +\input{structure_aware_prototype/results/full/thesis_results.tex}
 +
-+表~\ref{tab:prototype_structure_effects}~进一步比较拓扑局部性和逻辑复用程度的影响。仅1个局部块更新时，实际处理范围为64个顶点，加权计算代价下降71.9\%，端到端加速比为1.88；更新8个块时，处理范围增大为512个顶点，代价下降比例和加速比分别减小至50.1\%和1.28。全部局部块更新或出现跨块更新时，规划器选择完整执行，表现出依赖局部性对范围收缩收益的影响。
++拓扑局部性使更新维护集中于需要重算的区域。表~\ref{tab:prototype_structure_effects}~中，1个局部块更新对应64个处理顶点，加权代价下降71.9\%，端到端加速比为1.88；8个块更新对应512个处理顶点，仍获得50.1\%的代价下降和1.28的加速比。全部局部块更新或出现跨块更新时，规划器选择完整执行，依据影响范围调整维护方式。
 +
 +\input{structure_aware_prototype/results/full/chapter_structure_effects.tex}
 +
-+在384条训练查询中，公共前缀组数为8时，分组执行数量平均约为516组，相对平均约1802个独立计算单元明显减少，加权计算代价下降76.1\%，端到端加速比为1.90。组数增至64和384后，可共享计算减少，代价下降比例依次减至61.5\%和16.2\%，加速比也减至1.58和1.07。前向和反向的一致性检查表明，共享计算及梯度汇总在上述条件下保持了训练过程。
++逻辑共性通过公共前缀共享直接减少算子执行。在384条训练查询、8组公共前缀条件下，平均约1802个独立计算单元被组织为约516组执行，加权代价下降76.1\%，端到端加速比为1.90。公共前缀组数为64和384时，代价分别下降61.5\%和16.2\%，加速比分别为1.58和1.07，呈现复用程度与收益的对应关系。前向、梯度和参数更新的一致性说明，共享计算及分支梯度汇总保持了训练语义。
 +
 +表~\ref{tab:prototype_video_budget}~比较不同阶段条件下的预算配置。异质阶段中，固定预算方案共使用168个精确块，阶段预算方案使用76个，相对完整预算192个均有减少；在留出误差满足要求时，阶段预算的加权代价下降32.4\%。较长序列中，阶段预算从完整配置的640个块降至238个，对应代价下降39.3\%和1.23的端到端加速比。同质阶段的预算差异缩小，而严格误差情形采用完整预算，体现了预算分配收益与阶段差异及质量要求的关系。
 +
 +\input{structure_aware_prototype/results/full/chapter_video_budget.tex}
 +
-+\subsection{范围收缩与节点合并的组合验证}
++\subsection{执行方案选择与代价构成}
 +
-+组合实验固定模型参数，先建立查询结果缓存，再改变部分查询的输入。公共依赖传播识别失效闭包，范围收缩只执行该闭包；节点合并在当前输入对应的计算图上识别公共子表达式；组合执行先确定范围，再对范围内的节点分组。参数快照变化时相关计算全部失效，训练模式则禁止通过跨批次前向缓存跳过梯度贡献。
++耗时分解揭示了不同方案在计算节省与组织成本之间的取舍。表~\ref{tab:prototype_composition}~中，固定组合方案将内核执行时间压缩至0.297\,ms，范围收缩方案为0.434\,ms；计入准备和规划后，两者的端到端加速比分别为1.61和1.76。自动选案承担候选比较，规划时间为1.332\,ms，占总耗时约39.2\%，并取得1.25的加速比。对执行方案的评价因而需要同时考察结构变换带来的内核节省和获得该方案的组织成本。
 +
-+表~\ref{tab:prototype_composition}~给出8组公共前缀、12.5\%查询输入变化时的组合结果。仅范围收缩将平均约1802个计算单元中的约222个纳入重算；仅节点合并在完整范围内形成约544组计算；组合执行进一步在重算范围内形成约100组计算。三种方案相对完整重算的加权代价分别下降82.1\%、73.7\%和89.4\%，全部查询输出保持一致，说明两类执行变换可以在同一计算图中共同作用。
++任务状态决定是否需要进行复杂的结构优化。全局图更新时，规划器选择完整计算，对应加速比为0.87；严格误差要求下，视频任务采用完整预算，加速比约为0.98；同质去噪阶段的加速比接近1。这些对照界定了候选搜索的使用条件：具有局部影响、公共计算或阶段需求差异的任务适合展开相应变换，接近完整执行的任务则应控制候选比较成本。加权代价与实测时间分别揭示变换收益和执行成本，为此提供判断依据。
 +
-+\input{structure_aware_prototype/results/full/chapter_composition.tex}
-+
-+输入变化比例增大时，范围收缩的收益逐步降低。在8组公共前缀条件下，输入变化比例为50\%时，组合执行的代价下降82.6\%；所有输入均变化后，仅范围收缩已没有有效收益，自动规划器选择节点合并。输入完全不变时，自动规划器选择仅使用缓存的范围方案，避免继续执行没有必要的合并分析。这些结果表明，处理范围会改变后续分组的对象，公共规划器能够依据同一结构描述选择不同的变换组合。
-+
-+\subsection{规划开销与端到端表现}
-+
-+组合变换减少的计算量与实际耗时之间仍受组织开销影响。表~\ref{tab:prototype_composition}~中，固定组合方案的内核执行耗时约为0.297\,ms，低于仅范围收缩的0.434\,ms，但准备和规划开销使其端到端加速比为1.61，低于仅范围收缩的1.76。自动选案执行同样的组合计算，规划耗时约为1.332\,ms，占总耗时约39.2\%，其端到端加速比为1.25。这说明候选方案比较具有实际成本，需要与节点计算收益一并考虑。
-+
-+在全局图更新条件下，自动规划器与参考方案均执行完整计算，但自动方案仍承担候选比较开销，其加速比为0.87；严格误差要求下的视频任务也选择完整预算，加速比约为0.98。同质去噪阶段的加速比接近1。原型因此同时记录加权代价与实测时间，前者用于比较结构变换的计算收益，后者检验当前实现中的净效果。
-+
-+原型已在候选方案之间复用结构等价分析及分组结果，减少重复规划；后续仍可根据任务规模和执行历史调整候选数量，并将内核测量结果用于校准代价参数。全部输入、方案、误差、逐次计时样本和源文件摘要均随实验保存，330条记录已通过完整覆盖和汇总一致性核验，另有17项检查验证独立最短路结果、数值梯度、缓存失效、预算守恒及误差超限回退。
++原型通过共享结构等价分析和分组结果减少重复规划，并将准备、规划和执行分别计时，使方案收益可以追溯到具体计算阶段。这一设计将统一代价目标与实际执行过程连接起来，为按任务规模和结构特征组织候选方案提供依据。
 +
 +\section{适用边界与讨论}
 +\label{sec:formal_framework_boundary}
 +
-+上述形式化框架具有一定的适用边界，对于具有以下三类特点的任务，其优化空间较为有限。
++形式化框架利用依赖局部性、逻辑共性和阶段需求差异降低计算代价。其适用条件由任务结构、准确性要求和主要成本来源共同决定，以下三类任务的优化空间受到相应条件约束。
 +
-+第一，结构较为简单的任务。一种情况是计算单元及其依赖关系固定。例如，仅包含少量算术操作的固定计算流程，各计算单元均直接参与结果计算，也不存在重复的中间结果，因而难以通过缩小计算范围或合并计算单元进一步降低计算代价；另一种情况是各计算单元的属性较为单一，难以通过差异化配置计算单元来提升整体效率的任务。例如，对不同计算单元执行相同处理规则，各单元所需的计算预算接近，因而通过重新分配预算获得的收益有限。
++第一，结构较为简单的任务。一种情况是计算单元及其依赖关系固定。例如，仅包含少量算术操作的固定计算流程，各计算单元均直接参与结果计算，也不存在重复的中间结果，因而难以通过缩小计算范围或合并计算单元进一步降低计算代价；另一种情况是各计算单元的属性较为单一，难以通过差异化配置计算单元来提升整体效率的任务。例如，对不同计算单元执行相同处理规则，且各单元所需的计算预算接近时，重新分配预算难以进一步减少总计算量。
 +
 +第二，对结果准确性要求极高，难以容忍近似误差的任务。例如，高精度数值求解、对误差累积敏感的长期科学仿真，以及需要严格控制数值误差的工程计算。在这类任务中，减少必要计算、采用近似计算或降低计算精度都可能影响结果的可靠性，通过结构感知优化实现高效推理受到较强约束。
 +
 +第三，瓶颈主要来自输入数据规模庞大的任务。例如，海量日志的全量统计、无筛选条件的数据库全表扫描，以及缺少稀疏性的大规模稠密数据处理。这类任务的计算需求主要随数据规模增长，难以仅通过结构感知显著减少必要的数据访问与计算，其主要优化手段通常包括增加计算资源，采用数据并行、任务并行及分布式处理，改善数据的计算、存储与传输效率。
 +
-+上述任务特征分别限制范围收缩、节点合并或预算调整的收益；实际应用还需将在线结构识别和执行组织开销纳入代价判断。本章原型采用构造任务的 CPU 仿真验证核心机制，完整模型和业务链路中的联合部署效果仍需进一步验证。
++上述条件对应范围、分组和预算三个维度的可调整空间，在线结构识别与执行组织成本则共同决定最终收益。本章采用 CPU 构造任务，验证结论对应三类核心机制的执行正确性与可组合性。
 +
 +\section{本章小结}
 +
-+本章建立了结构感知高效推理的形式化框架，将拓扑、逻辑和时序依赖统一表示为推理依赖图，并将范围收缩、节点合并和预算分配描述为任务约束下的执行变换。在此基础上实现公共任务表示、执行规划、领域适配和结果验证模块，完成三类任务的执行检查及范围与分组的组合实验。实验显示，可利用的结构差异能够转化为计算收益，而端到端效果还受规划开销和任务约束影响。形式化描述、工程实现和约束验证共同构成了连接三项具体研究的分析与验证过程。
++本章以推理依赖图、统一代价目标和公共执行机制连接三类结构感知方法。范围收缩确定必要计算，节点合并组织共享计算，预算分配匹配阶段需求，三类变换共同刻画任务约束下的执行方案。工程原型在三类构造任务上保持相应结果约束，并验证了范围收缩与节点合并的互补收益：代表性组合条件下，加权计算代价下降89.4\%，查询输出保持一致。由此，三项具体研究获得了共同的形式化解释和可组合执行的工程依据。
 --- a/Chapter/Chapter_introduction.tex
 +++ b/Chapter/Chapter_introduction.tex
 @@ -72,9 +72,9 @@
@@ -293,12 +295,12 @@
 +\subsection{研究内容四：结构感知高效推理的形式化框架和原型验证}
  
 -为进一步验证三项研究之间的共性联系，本文实现结构感知高效推理工程原型，将计算范围确定、计算过程合并和计算预算分配纳入同一套任务表示、执行规划与结果验证流程。原型以三项研究的核心结构感知机制为适配对象，通过构造输入上的 CPU 仿真，考察统一框架的工程可实现性以及不同执行变换的可组合性。第~\ref{sec:formal_framework}~节进一步给出这些机制的形式化描述。
-+本研究内容在前三项具体研究的基础上，研究结构信息如何形成统一的计算描述和执行机制。动态图中的拓扑依赖、逻辑查询中的算子依赖和视频去噪中的时序依赖虽然表现形式不同，但均可用于分析计算的必要性、可复用性和收益贡献。需要进一步建立共同的代价表达，并通过工程原型检验这些结构规律能否转化为可执行的优化方案。
++本研究内容建立连接前三项具体方法的形式化框架，并以公共执行机制实现原型验证。动态图中的拓扑依赖、逻辑查询中的算子依赖和视频去噪中的时序依赖被统一表示为推理依赖图，计算的必要性、可复用性和收益贡献分别落实为范围、分组和预算决策，使三类结构信息能够进入共同的执行规划过程。
  
 -图~\ref{fig:structure_aware_prototype}~展示了原型的系统架构。领域适配器将动态图维护、知识图谱逻辑查询训练和视频生成任务描述为计算单元及其依赖关系，并提供单元属性、计算代价与任务约束。公共规划器据此生成实际处理范围、节点分组和计算预算，比较合法候选方案的代价，再通过统一执行入口调用对应的领域后端。不同候选方案共用结构等价分析结果，以减少重复规划开销；完整执行方案始终保留，在候选方案缺少收益或不满足约束时提供回退路径。
-+该研究内容包括三个方面。第一，将三类结构统一表示为推理依赖图，以计算范围、节点分组和计算预算刻画执行过程，建立正确性、训练语义或生成质量要求下的形式化框架。第二，实现共享任务表示、执行规划、领域适配和结果验证的工程原型，将范围收缩、节点合并及预算分配接入统一流程。第三，在三类构造任务及增量逻辑查询组合实验中比较执行结果、计算代价和端到端耗时，分析结构差异、任务约束和规划开销对收益的影响。
++本文以统一代价目标描述三类执行变换，在正确性、训练语义或生成质量要求下选择计算方案；通过共享任务表示、公共规划器和领域适配器，将形式化对象转化为可执行机制。原型在三类构造任务上验证结果约束和结构收益，并在增量逻辑查询中组合范围收缩与节点合并，检验两类变换如何共同减少冗余计算。由此，三项具体方法在计算描述、执行接口和组合验证三个方面建立了直接联系。
 +
-+本文由此形成从具体方法到统一抽象、再到原型验证的研究内容。第~\ref{chap:formal_framework_prototype}~章详细介绍形式化框架、工程原型和实验结果，并讨论其适用边界。
++第~\ref{chap:formal_framework_prototype}~章给出形式化框架、工程原型及组合实验，说明结构差异如何形成计算收益，以及任务约束如何确定可采用的执行变换。
 +
 +\section{论文组织结构}
 +
@@ -382,7 +384,7 @@
  
  在视频 DiT 稀疏注意力推理方面，本文提出免训练的精确预算分配稀疏注意力机制 PASA。该机制将相邻去噪步速度场预测值的 $L_1$ 距离定义为离散去噪轨迹曲率，并在给定总精确块数下依据曲率生成逐去噪步预算。预算确定后，选择边界软化用于调整执行精确计算的块集合，分组一阶补偿用于近似未选块的注意力贡献。在与固定预算 PISA 保持相同平均稀疏度和预热比例时，PASA 的端到端生成延迟与 PISA 相近，并在三个模型上减小了多项指标相对于全量注意力输出的偏差；与全量注意力相比，三个模型上的端到端推理加速比分别达到 1.61 倍、2.13 倍和 2.34 倍。
 +
-+在形式化框架和原型验证方面，本文将三类任务表示为推理依赖图，以计算范围、节点分组和计算预算建立统一的计算代价描述，并实现公共规划与三类领域适配。在5个输入种子的 CPU 仿真中，验证地标距离、逻辑训练损失、梯度和参数更新的一致性，以及视频潜变量相对全注意力输出的误差。增量查询组合实验进一步表明，范围收缩与节点合并能够在同一计算图上共同作用，代表性条件下加权计算代价下降89.4\%。该研究内容为三项具体方法提供了统一的形式化解释及工程验证。
++在形式化框架和原型验证方面，本文以推理依赖图和统一计算代价连接三类结构感知机制，并实现共享任务表示、公共规划和领域适配。范围收缩与节点合并在同一增量查询图中共同减少冗余计算，代表性条件下加权代价下降89.4\%，查询输出保持一致；5个输入种子的 CPU 仿真同时验证了地标距离、逻辑训练损失、梯度及参数更新的结果约束，以及视频潜变量相对全注意力输出的误差要求。该研究内容使三项具体方法具有共同的代价描述、执行机制和组合验证依据。
  
  % \section{创新点总结}
  
@@ -501,21 +503,23 @@
  
  \section{应用价值}
  
-@@ -169,11 +83,11 @@
+@@ -169,12 +83,12 @@
  
  \section{问题与展望}
  
 -尽管本文已在三个方向上开展了系统研究，但基于结构感知的高效推理仍有若干值得进一步探索的问题。
-+尽管本文已在三类任务及形式化框架和原型验证方面开展了研究，但基于结构感知的高效推理仍有若干值得进一步探索的问题。
++本文的三类结构感知方法、形式化框架和工程原型，为自动提取结构、跨设备规划及多任务协同提供了研究基础。后续工作可围绕以下方向展开。
  
 -第一，跨场景结构表示与自动优化仍有探索空间。本文分别针对拓扑、逻辑和时序结构设计了专门方法。未来可研究统一中间表示，将图更新传播、查询计算图和注意力稀疏模式纳入可组合的优化框架。
-+第一，跨场景结构表示与自动优化仍有探索空间。第六章已建立形式化框架并实现公共任务表示，后续可进一步研究从真实系统中自动提取依赖关系、计算属性及语义约束，完善跨任务和跨设备的代价参数校准，并减少候选方案生成与选择的开销。
++第一，发展跨场景结构提取与自动规划。以第六章的形式化框架和公共任务表示为基础，可研究从真实系统中自动提取依赖关系、计算属性及语义约束，结合跨任务和跨设备的代价校准组织候选方案，提高自动规划的执行效率。
  
 -第二，结构感知加速与启发式策略可以进一步结合。本文的三项工作主要依赖可解释的结构规律和系统设计。未来可探索利用强化学习、代价模型或在线自适应策略选择最优预算、缓存粒度和执行计划，使系统能够根据数据分布、硬件状态和质量反馈动态调整。
 +第二，结构感知加速与启发式策略可以进一步结合。本文的三项具体方法主要依赖可解释的结构规律和系统设计。未来可探索利用强化学习、代价模型或在线自适应策略选择最优预算、缓存粒度和执行计划，使系统能够根据数据分布、硬件状态和质量反馈动态调整。
  
  第三，面向大模型时代的推理系统需要更强的端到端协同。随着知识图谱、视频生成和大语言模型逐步融合，未来的智能推理系统将同时处理符号结构、向量检索、长上下文注意力和工具调用等多种计算形态。如何在这些异构计算之间感知结构并协同优化，是后续研究的重要方向。
  
+-第四，结构感知方法还需要面向真实部署环境进一步完善。对于动态图最短路径系统，第三章给出的长期演化下的地标重选触发条件、重建成本估计和版本切换方案属于工程扩展讨论，现有实验仅验证固定地标集合下的精确维护，跨周期重选的实际部署效果尚未验证。知识图谱复杂逻辑查询训练系统需要适配更多异构硬件和分布式参数管理方式，DiT 稀疏注意力机制需要在更多模型架构、更多分辨率和更多采样器设置下验证稳定性。这些问题将推动结构感知高效计算从针对特定任务的算法和系统优化发展为更通用的智能推理基础设施。
++第四，拓展结构感知方法的长期运行与部署场景。动态图最短路径系统可在第三章地标重选触发条件、重建成本估计和版本切换方案的基础上开展跨周期实测，将现有固定地标集合下的精确维护扩展到长期图演化。知识图谱复杂逻辑查询训练系统可结合异构硬件和分布式参数管理优化数据流，DiT 稀疏注意力机制可在更多模型架构、分辨率和采样器设置下研究预算配置与生成质量的关系。这些方向将拓展结构感知方法的应用范围，支持更复杂的智能推理系统。
 --- a/Chapter/Chapter_cnabstract.tex
 +++ b/Chapter/Chapter_cnabstract.tex
 @@ -1,7 +1,7 @@
@@ -532,9 +536,9 @@
      （3）在资源分配层面，本文研究视频 DiT 稀疏注意力推理问题，提出免训练的精确预算分配稀疏注意力（Precision-Allocated Sparse Attention，PASA）机制。该任务的时序结构体现为相邻去噪步速度场预测值的变化。不同去噪阶段的变化程度不同，对精确注意力计算的需求也存在差异。以 PISA 为代表的固定稀疏度方法在稀疏区间内为各去噪步分配一致的稀疏度，难以适应这种阶段差异。PASA 利用相邻速度场预测值的 $L_1$ 距离设置逐去噪步稀疏度，为差异较大的去噪步分配更多精确注意力块，并结合块选择与未选块近似维持输出保真度。实验表明，该方法能够在相同精确计算预算下改善输出保真度，并在输出保真度与 PISA 相近时提高平均稀疏度、降低生成延迟。
  
 -    综上，三项工作分别利用拓扑、逻辑和时序结构，优化推理范围、推理编排和资源分配。实验结果表明，FulBM 在大规模图混合更新实验中相对 BatchHL 的加速比约为 5.6～228.6 倍，FlashEKGR 在多跳复杂逻辑查询训练中相对 SMORE 的最高加速比达到 5.67 倍；与全量注意力相比，PASA 在三个视频生成模型上的端到端推理加速比平均达到 2.02 倍。
-+    （4）在统一抽象与验证层面，本文建立结构感知高效推理的形式化框架，将拓扑、逻辑和时序依赖表示为推理依赖图，以计算范围、节点分组和计算预算描述执行方案及其代价，并实现公共规划与多领域适配的工程原型。通过三类构造任务和增量查询组合实验，验证执行结果及范围收缩与节点合并的组合收益，分析结构差异、任务约束和规划开销对效率的影响。
++    （4）在统一抽象与验证层面，本文以推理依赖图、计算范围、节点分组和计算预算建立形式化框架，并将其实现为共享任务表示、公共规划与多领域适配的工程原型。三类构造任务验证了共同执行机制对相应结果约束的保持；增量查询实验进一步表明，范围收缩与节点合并能够共同减少冗余计算，代表性组合条件下加权计算代价下降89.4\%，查询输出保持一致。
 +
-+    综上，前三项研究分别利用拓扑、逻辑和时序结构，优化推理范围、推理编排和资源分配。实验结果表明，FulBM 在大规模图混合更新实验中相对 BatchHL 的加速比约为 5.6～228.6 倍，FlashEKGR 在多跳复杂逻辑查询训练中相对 SMORE 的最高加速比达到 5.67 倍；与全量注意力相比，PASA 在三个视频生成模型上的端到端推理加速比平均达到 2.02 倍。第四项研究进一步以形式化框架和原型验证增强了三类结构感知机制之间的联系。
++    综上，前三项研究分别利用拓扑、逻辑和时序结构，优化推理范围、推理编排和资源分配。实验结果表明，FulBM 在大规模图混合更新实验中相对 BatchHL 的加速比约为 5.6～228.6 倍，FlashEKGR 在多跳复杂逻辑查询训练中相对 SMORE 的最高加速比达到 5.67 倍；与全量注意力相比，PASA 在三个视频生成模型上的端到端推理加速比平均达到 2.02 倍。第四项研究以共同的代价描述、执行接口和组合验证，将三类结构感知机制连接为统一的方法体系。
  
      \cnkeywords{推理；结构感知；动态图；知识图谱；稀疏注意力}
  \end{cnabstract}
@@ -554,9 +558,9 @@
      (3) At the resource-allocation level, this dissertation studies sparse attention inference for video DiTs and proposes Precision-Allocated Sparse Attention (PASA), a training-free mechanism. The temporal structure of this task is reflected in changes between velocity-field predictions at adjacent denoising steps. The magnitude of these changes varies across denoising stages, as does the demand for exact attention computation. Fixed-sparsity methods such as PISA assign the same sparsity ratio to each denoising step within the sparse interval, making it difficult to accommodate these stage-dependent differences. PASA uses the $L_1$ distance between adjacent velocity-field predictions to set per-step sparsity ratios, allocating more exact attention blocks to steps with larger differences. It combines block selection with approximation of unselected blocks to maintain output fidelity. Experiments show that PASA improves output fidelity under the same exact-computation budget and enables higher average sparsity and lower generation latency at output fidelity comparable to PISA.
  
 -    In summary, the three studies exploit topological, logical, and temporal structures to optimize computation range, reasoning orchestration, and resource allocation, respectively. Experimental results show that FulBM achieves speedups of approximately 5.6--228.6$\times$ over BatchHL for mixed batch updates on large-scale graphs, FlashEKGR achieves a speedup of up to 5.67$\times$ over SMORE for multi-hop complex logical-query training, and PASA achieves an average end-to-end inference speedup of 2.02$\times$ over full attention on three video generation models.
-+    (4) At the level of unified abstraction and validation, this dissertation develops a formal framework for structure-aware efficient reasoning. It represents topological, logical, and temporal dependencies as computation dependency graphs, and describes execution plans and their costs through computation scope, node grouping, and computation budgets. An engineering prototype implements shared planning and domain adapters. Simulations on three constructed tasks and incremental-query experiments verify execution results and the composition of scope reduction with node merging, and analyze how structural differences, task constraints, and planning overhead affect efficiency.
++    (4) This dissertation unifies the three mechanisms through a formal framework based on computation dependency graphs, execution scope, node grouping, and computation budgets. An engineering prototype realizes these abstractions as a shared task representation, a common planner, and domain adapters. Simulations on three constructed tasks verify that this execution mechanism preserves the corresponding result constraints. Incremental-query experiments further demonstrate complementary gains from scope reduction and node merging: their composition reduces weighted computation cost by 89.4\% in a representative setting while preserving query outputs.
 +
-+    In summary, the first three studies exploit topological, logical, and temporal structures to optimize computation range, reasoning orchestration, and resource allocation, respectively. Experimental results show that FulBM achieves speedups of approximately 5.6--228.6$\times$ over BatchHL for mixed batch updates on large-scale graphs, FlashEKGR achieves a speedup of up to 5.67$\times$ over SMORE for multi-hop complex logical-query training, and PASA achieves an average end-to-end inference speedup of 2.02$\times$ over full attention on three video generation models. The fourth study strengthens the connection among these mechanisms through formal modeling and prototype validation.
++    In summary, the first three studies exploit topological, logical, and temporal structures to optimize computation range, reasoning orchestration, and resource allocation, respectively. Experimental results show that FulBM achieves speedups of approximately 5.6--228.6$\times$ over BatchHL for mixed batch updates on large-scale graphs, FlashEKGR achieves a speedup of up to 5.67$\times$ over SMORE for multi-hop complex logical-query training, and PASA achieves an average end-to-end inference speedup of 2.02$\times$ over full attention on three video generation models. The fourth study connects these mechanisms through a common cost formulation, shared execution interfaces, and compositional validation.
  
      \enkeywords{Reasoning; Structure awareness; Dynamic graphs; Knowledge graphs; Sparse attention}
  \end{enabstract}
