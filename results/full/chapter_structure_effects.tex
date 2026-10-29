@@ -1,0 +1,22 @@
+% Generated from audited results/full records; no experiments are rerun.
+\begin{table}[htbp]
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{4pt}
+    \renewcommand\arraystretch{1.2}
+    \caption{拓扑局部性与逻辑复用程度对原型收益的影响}
+    \label{tab:prototype_structure_effects}
+    \begin{tabular}{p{2.0cm}p{3.4cm}ccc}
+        \toprule
+        任务 & 结构条件 & 计算代价下降 & 端到端加速比 & 选中方案 \\
+        \midrule
+        动态图维护 & 1个局部块更新 & 71.9\% & $1.88\pm0.14$ & 范围收缩 \\
+        动态图维护 & 8个局部块更新 & 50.1\% & $1.28\pm0.23$ & 范围收缩 \\
+        动态图维护 & 全部32个局部块更新 & 0.0\% & $0.87\pm0.05$ & 完整执行 \\
+        动态图维护 & 跨块更新 & 0.0\% & $0.93\pm0.02$ & 完整执行 \\
+        逻辑查询训练 & 8组公共前缀 & 76.1\% & $1.90\pm0.02$ & 节点合并 \\
+        逻辑查询训练 & 64组公共前缀 & 61.5\% & $1.58\pm0.03$ & 节点合并 \\
+        逻辑查询训练 & 384组公共前缀 & 16.2\% & $1.07\pm0.02$ & 节点合并 \\
+        \bottomrule
+    \end{tabular}
+\end{table}

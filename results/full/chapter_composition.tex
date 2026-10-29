@@ -1,0 +1,20 @@
+% Generated from audited results/full records; no experiments are rerun.
+\begin{table}[htbp]
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{4pt}
+    \renewcommand\arraystretch{1.2}
+    \caption{范围收缩与节点合并的组合验证及耗时分解}
+    \label{tab:prototype_composition}
+    \begin{tabular}{p{2.0cm}cccccc}
+        \toprule
+        执行方案 & 代价下降 & 准备/ms & 规划/ms & 执行/ms & 总耗时/ms & 加速比 \\
+        \midrule
+        完整重算 & 0.0\% & 1.672 & 0.380 & 2.185 & 4.236 & $1.00\pm0.00$ \\
+        仅范围收缩 & 82.1\% & 1.809 & 0.200 & 0.434 & 2.443 & $1.76\pm0.35$ \\
+        仅节点合并 & 73.7\% & 1.712 & 0.833 & 0.869 & 3.415 & $1.25\pm0.11$ \\
+        组合执行 & 89.4\% & 1.884 & 0.489 & 0.297 & 2.670 & $1.61\pm0.30$ \\
+        自动选案 & 89.4\% & 1.763 & 1.332 & 0.304 & 3.399 & $1.25\pm0.11$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}

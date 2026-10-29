@@ -1,15 +1,123 @@
---- a/Chapter/Chapter_introduction.tex
-+++ b/Chapter/Chapter_introduction.tex
-@@ -107,6 +107,51 @@
+--- a/main.tex
++++ b/main.tex
+@@ -156,6 +156,7 @@
+ \include{Chapter/Chapter_fulbm} % 拓扑结构感知的动态图最短路径高效推理
+ \include{Chapter/Chapter_flashekgr} % 逻辑结构感知的知识图谱复杂逻辑高效推理
+ \include{Chapter/Chapter_pasa} % 时序结构感知的视频 DiT 稀疏注意力高效推理
++\include{Chapter/Chapter_framework} % 结构感知高效推理的形式化框架和原型验证
+ \include{Chapter/Chapter_conclusion} % 总结与展望
  
- 本文提出精确预算分配稀疏注意力机制 PASA，将去噪时序结构分析用于精确注意力计算资源的分配。该方法以相邻去噪步速度场预测值的差异刻画去噪轨迹曲率，据此在给定总精确块数下分配逐去噪步预算，为变化较大的阶段分配更多精确计算，并结合选择边界软化与分组一阶补偿完成精确块选择和未选块近似。通过在相同预算下比较输出保真度，并结合视频质量指标检验生成结果，验证动态预算分配能否更有效地利用有限计算资源，同时保持视频生成质量。
- 
-+\section{统一工程原型与融合验证}
+ \bibliographystyle{gbt7714-numerical}
+--- /dev/null
++++ b/Chapter/Chapter_framework.tex
+@@ -0,0 +1,259 @@
++\chapter{结构感知高效推理的形式化框架和原型验证}
++\label{chap:formal_framework_prototype}
++
++\section{本章引言}
++
++第三至第五章分别从拓扑、逻辑和时序结构出发，研究动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频 DiT 稀疏注意力推理。三类任务的计算对象和执行约束不同，但均需要依据结构信息判断计算的必要性、可复用性与收益贡献。将这些判断转化为共同的计算描述和执行机制，有助于明确三项研究之间的内在联系，并考察结构感知方法能否在统一的工程实现中得到验证。
++
++本章首先建立结构感知高效推理的形式化框架，将三类结构表示为推理依赖图，以计算范围、节点分组和计算预算刻画执行方案，并给出任务约束下的统一代价目标。随后实现共享任务表示、执行规划、领域适配和结果验证的工程原型，在三类构造任务上检验执行结果与计算收益，并通过增量逻辑查询考察范围收缩与节点合并的组合关系。最后结合实验结果讨论形式化框架的适用边界。
++
++\section{形式化框架}
++\label{sec:formal_framework}
++本节对“结构感知的高效推理方法”做了形式化。首先将拓扑、逻辑和时序结构统一表示为推理依赖图，然后建立总计算代价模型，最后刻画范围收缩、节点合并与预算分配三类优化策略，并归纳其统一优化目标。
++\subsection{推理依赖图与计算代价}
++
++为统一描述拓扑、逻辑和时序结构，将推理单元集合记为 $\mathcal{U}_{\mathrm{s}}$，单元之间的依赖关系集合记为 $\mathcal{E}_{\mathrm{s}}$，由二者构成的推理依赖图记为 $\mathcal{G}_{\mathrm{s}}$，即
++\begin{equation}
++    \mathcal{G}_{\mathrm{s}}=(\mathcal{U}_{\mathrm{s}},\mathcal{E}_{\mathrm{s}})\cmathstop
++    \label{eq:framework_structure_graph}
++\end{equation}
++拓扑结构通过图的边连接组织路径传播，逻辑结构通过有向无环图组织算子计算，时序结构通过链式依赖组织逐步去噪。表~\ref{tab:framework_structure_mapping} 给出了三类结构在推理依赖图中的对应关系。各推理单元同时关联其输入、状态和计算属性，为范围判定、计算合并及预算分配提供依据。
++
++\begin{table}[htbp]
++    \centering
++    \caption{三类结构在推理依赖图中的对应关系}
++    \label{tab:framework_structure_mapping}
++    \small
++    \setlength{\tabcolsep}{4pt}
++    \renewcommand\arraystretch{1.2}
++    \begin{tabular}{p{2.0cm}p{5.0cm}p{6.2cm}}
++        \toprule
++        结构类型 & 推理单元 $\mathcal{U}_{\mathrm{s}}$ & 依赖关系 $\mathcal{E}_{\mathrm{s}}$ \\
++        \midrule
++        拓扑结构 & 动态图顶点的标签状态处理 & 边连接所形成的路径传播依赖 \\
++        逻辑结构 & 查询计算图中的逻辑算子调用 & 算子之间的输入输出依赖 \\
++        时序结构 & 不同去噪步中的 DiT 模型调用 & 去噪步之间的状态与顺序依赖 \\
++        \bottomrule
++    \end{tabular}
++\end{table}
++
++在同一任务内采用一致的计算代价口径，将一个推理单元记为 $u$，其计算代价记为 $\omega_u$，参考执行过程的总计算代价记为 $\mathcal{W}_0$，则
++\begin{equation}
++    \mathcal{W}_0=\sum_{u\in\mathcal{U}_{\mathrm{s}}}\omega_u\cmathstop
++    \label{eq:framework_reference_cost}
++\end{equation}
++结构感知优化通过改变参与计算的单元范围、单元之间的组合方式及各单元的计算预算，降低满足任务要求所需的总计算代价。三项研究分别对应以下三种图上的执行变换。
++
++\subsection{依赖影响驱动的范围收缩}
++
++依赖影响的差异决定计算范围。将实际处理的推理单元集合记为 $A_{\mathrm{s}}$，其为 $\mathcal{U}_{\mathrm{s}}$ 的子集；将节点计算之外的在线结构识别与编排代价记为 $\mathcal{W}_{\mathrm{a}}$，范围收缩后的总计算代价记为 $\mathcal{W}_{\mathrm{scope}}$，则
++\begin{equation}
++    \mathcal{W}_{\mathrm{scope}}
++    =\mathcal{W}_{\mathrm{a}}+\sum_{u\in A_{\mathrm{s}}}\omega_u,
++    \qquad A_{\mathrm{s}}\subseteq\mathcal{U}_{\mathrm{s}}\cmathstop
++    \label{eq:framework_scope_cost}
++\end{equation}
++在动态图索引维护中，更新边与不同顶点之间的最短路径依赖不同，因此各顶点的标签状态受到更新影响的程度也不同。FulBM 根据边插入与边删除的传播规律，识别标签受影响顶点及其传播边界，使计算集中在需要检查与修复的范围内，并保持维护索引与更新后图上的重建索引一致。该变换利用拓扑依赖确定计算必要性，通过缩小 $A_{\mathrm{s}}$ 减少无关访问和重复传播。
++
++\subsection{逻辑共性驱动的节点合并}
++
++逻辑计算的共性决定节点的合并方式。将 $A_{\mathrm{s}}$ 上满足依赖与语义要求的节点分组记为 $\mathcal{P}_{\mathrm{s}}$，其中一个合并组记为 $J$，该组合并执行的计算代价记为 $\omega_J$，节点合并后的总计算代价记为 $\mathcal{W}_{\mathrm{merge}}$，则
++\begin{equation}
++    \mathcal{W}_{\mathrm{merge}}
++    =\mathcal{W}_{\mathrm{a}}+\sum_{J\in\mathcal{P}_{\mathrm{s}}}\omega_J\cmathstop
++    \label{eq:framework_merge_cost}
++\end{equation}
++当多个节点具有相同算子、输入及参数状态时，公共计算只需执行一次，其结果由后续分支共享，反向传播时累加各分支的梯度贡献。将减少重复计算的合并条件表示为
++\begin{equation}
++    \omega_J<\sum_{u\in J}\omega_u\cmathstop
++    \label{eq:framework_merge_gain}
++\end{equation}
++例如，从同一锚实体出发、沿同一关系执行投影的多个分支，可以合并其公共逻辑前缀。对于输入不同但依赖关系允许批量执行的同类算子，合并执行的收益来自减少算子调用与中间数据处理开销，以及提高并行执行效率。FlashEKGR 利用上述逻辑共性重组查询计算图，并协同优化嵌入加载、访存布局和执行图缓存，在保持训练语义与模型精度的前提下降低执行代价。
++
++\subsection{阶段差异驱动的预算分配}
++
++时序阶段的差异决定节点计算预算的分配。将推理单元的计算预算记为 $\beta_u$，该预算下的节点计算代价记为 $\omega_u(\beta_u)$，预算分配后的总计算代价记为 $\mathcal{W}_{\mathrm{alloc}}$，则
++\begin{equation}
++    \mathcal{W}_{\mathrm{alloc}}
++    =\mathcal{W}_{\mathrm{a}}+\sum_{u\in\mathcal{U}_{\mathrm{s}}}\omega_u(\beta_u)\cmathstop
++    \label{eq:framework_allocation_cost}
++\end{equation}
++对于视频 DiT 推理，节点预算对应各去噪步执行精确注意力的块数，节点代价包含该步的精确注意力、未选块近似及其他必要计算。不同去噪阶段对生成质量的影响不同，因此增加相同计算预算所带来的质量收益也不同。PASA 以离散去噪轨迹曲率为分配依据，为变化显著的阶段保留更多精确计算，减少变化平缓阶段的精确计算。在保持生成质量的条件下，通过提高平均稀疏度降低总计算代价。预算校准在线下完成，不计入本节的在线计算代价。
++
++\subsection{统一优化目标}
++
++\begin{samepage}
++三类执行变换可统一为计算范围、节点分组和计算预算的联合选择。将合并组的预算记为 $\beta_J$，对应计算代价记为 $\omega_J(\beta_J)$，各组预算组成的向量记为 $\symbf{\beta}$，统一总计算代价记为 $\mathcal{W}(A_{\mathrm{s}},\mathcal{P}_{\mathrm{s}},\symbf{\beta})$，则
++\begin{equation}
++    \mathcal{W}(A_{\mathrm{s}},\mathcal{P}_{\mathrm{s}},\symbf{\beta})
++    =\mathcal{W}_{\mathrm{a}}+
++    \sum_{J\in\mathcal{P}_{\mathrm{s}}}\omega_J(\beta_J)\cmathstop
++    \label{eq:framework_unified_cost}
++\end{equation}
++\end{samepage}
++在满足索引正确性、训练语义或生成质量要求的条件下，优化目标为
++\begin{equation}
++    \min_{A_{\mathrm{s}},\mathcal{P}_{\mathrm{s}},\symbf{\beta}}
++    \mathcal{W}(A_{\mathrm{s}},\mathcal{P}_{\mathrm{s}},\symbf{\beta})\cmathstop
++    \label{eq:framework_optimization}
++\end{equation}
++其中，节点分组仅在实际处理集合上形成，每个保留节点归属一个合并组；未经合并的节点独立成组。FulBM 主要优化参与计算的节点范围，FlashEKGR 主要优化节点的合并与执行编排，PASA 主要优化节点的计算预算。三项工作分别利用依赖影响差异、逻辑计算共性和时序阶段差异，将结构信息转化为计算必要性、可复用性与收益贡献的判断依据，共同服务于任务约束下的计算代价降低。
++
++\section{工程原型设计与实现}
 +\label{sec:structure_aware_prototype}
 +
-+为进一步验证三项研究之间的共性联系，本文实现结构感知高效推理工程原型，将计算范围确定、计算过程合并和计算预算分配纳入同一套任务表示、执行规划与结果验证流程。原型以三项研究的核心结构感知机制为适配对象，通过构造输入上的 CPU 仿真，考察统一框架的工程可实现性以及不同执行变换的可组合性。第~\ref{sec:formal_framework}~节进一步给出这些机制的形式化描述。
++\subsection{系统架构}
 +
-+图~\ref{fig:structure_aware_prototype}~展示了原型的系统架构。领域适配器将动态图维护、知识图谱逻辑查询训练和视频生成任务描述为计算单元及其依赖关系，并提供单元属性、计算代价与任务约束。公共规划器据此生成实际处理范围、节点分组和计算预算，比较合法候选方案的代价，再通过统一执行入口调用对应的领域后端。不同候选方案共用结构等价分析结果，以减少重复规划开销；完整执行方案始终保留，在候选方案缺少收益或不满足约束时提供回退路径。
++工程原型将形式化框架中的结构表示、执行变换和代价比较实现为公共模块。图~\ref{fig:structure_aware_prototype}~展示其系统架构。领域适配器接收具体任务及其当前状态，生成计算单元、依赖关系、单元属性和任务约束；公共规划器比较适用的范围、分组和预算方案，再通过统一执行入口调用领域后端。执行结束后，验证模块检查结果并记录实际执行计数及性能数据，必要时反馈至规划器采用完整执行方案。
 +
 +\begin{figure}[htbp]
 +    \centering
@@ -35,39 +143,457 @@
 +    \label{fig:structure_aware_prototype}
 +\end{figure}
 +
-+三类领域适配分别落实不同的结构利用方式。动态图适配器在具有单边界局部块的构造图上维护精确地标距离，利用局部更新不改变块外距离的结构性质缩小重算范围，出现跨块更新或分区条件失效时采用全图重算。逻辑查询适配器在构造知识图谱上生成包含关系投影、交集、并集和否定的训练查询，通过公共子表达式分组减少重复计算，并汇总共享节点的分支梯度。视频适配器对合成时空潜变量执行块注意力与迭代去噪，依据离线校准轨迹的阶段差异生成逐步预算，以全注意力输出作为数值参考检查近似误差。三类任务共用方案表示、变换规则接口、代价比较及验证记录机制，领域后端负责具体计算与语义约束。
++公共层负责方案的表示、生成、比较与校验，领域后端负责计算语义及具体内核。对于动态图，依赖表示允许包含环，更新传播由图维护后端执行；逻辑查询采用有向无环计算图；去噪过程采用顺序依赖链。三类任务通过同一套接口提交结构和获取方案，使形式化框架中的对象能够直接对应到工程实现。
 +
-+为验证执行变换之间的组合关系，原型进一步构造带有公共逻辑前缀的增量查询批次。在模型参数固定的条件下，部分查询输入变化后，先通过公共依赖传播确定缓存失效范围，再在需要重算的范围内合并等价计算。实验分别设置完整重算、仅范围收缩、仅节点合并、组合执行和自动选案，并改变输入变化比例及公共前缀的复用程度，检验两类变换是否能够共同降低计算代价。该实验中的缓存依赖输入版本和参数快照；参数变化后相关计算全部失效，训练任务不通过跨批次前向缓存跳过梯度计算。
++\subsection{统一任务表示与执行方案}
 +
-+仿真实验采用5个输入随机种子，每种条件预热2次并重复计时7次，共形成330条任务情形、输入种子与执行方案的组合记录。逻辑查询训练连续执行6轮参数更新，逐轮比较前向结果、损失与反向梯度，并检查最终参数；动态图维护比较全部地标距离；视频张量去噪在与校准种子不重叠的留出输入上检查潜变量均方根误差（Root Mean Square Error，RMSE）。视频预算使用另外3个输入种子离线校准，校准开销单独记录，不计入在线执行时间。增量查询的初始缓存和动态图的初始索引均作为预处理状态提供。
++原型以任务对象描述待处理计算，以执行方案对象描述结构感知优化后的计算安排。表~\ref{tab:prototype_objects}~给出主要对象与形式化框架之间的对应关系。每个计算单元记录标识、算子类型、前驱、参数属性、计算权重及是否允许共享；任务对象进一步记录实际需要处理的范围、范围有效性的判定依据、预算上下界及结果约束。
 +
-+表~\ref{tab:prototype_simulation_results}~给出代表性构造输入上的仿真结果。加权计算代价依据各任务内部的算子权重及结构组织计数计算，端到端耗时则包含任务适配、方案规划与校验、计算执行及训练参数更新；结果对照验证的耗时单独保存。表中的代价下降比例和加速比均先按输入种子计算，再对5个种子取均值，完整记录同时保存逐次计时样本、种子间标准差、实际执行计数和误差。原型保留全局更新、较低复用程度、同质去噪阶段及严格误差阈值等情形，用于考察结构收益减弱和规划开销占比上升时的表现。
++\begin{table}[htbp]
++    \centering
++    \caption{形式化框架与工程原型对象的对应关系}
++    \label{tab:prototype_objects}
++    \small
++    \setlength{\tabcolsep}{4pt}
++    \renewcommand\arraystretch{1.2}
++    \begin{tabular}{p{2.7cm}p{3.0cm}p{7.2cm}}
++        \toprule
++        工程对象 & 对应的形式化对象 & 主要职责 \\
++        \midrule
++        结构与任务描述 & $\mathcal{G}_{\mathrm{s}}$ & 描述计算单元、依赖、属性与约束 \\
++        范围方案 & $A_{\mathrm{s}}$ & 确定需要执行的计算单元 \\
++        分组方案 & $\mathcal{P}_{\mathrm{s}}$ & 组织共享计算或合并执行的单元 \\
++        预算方案 & $\symbf{\beta}$ & 指定各单元或合并组的计算预算 \\
++        公共规划器 & $\mathcal{W}(\cdot)$ & 评估合法候选方案并选择执行安排 \\
++        执行与验证记录 & 正确性或质量约束 & 派发计算，记录误差、执行计数及耗时 \\
++        \bottomrule
++    \end{tabular}
++\end{table}
++
++执行方案包含有序的实际处理节点、覆盖该范围的互斥分组、预算配置及代价分解。未经合并的节点独立成组；允许共享的节点依据算子、参数和前驱表达式建立等价类。结构等价分析结果在同一任务的候选方案之间复用，分组结果也供合法性检查共用，以减少重复分析开销。
++
++\subsection{公共规划与执行流程}
++
++公共规划器首先生成完整执行的参考方案，再依据任务提供的结构条件生成范围收缩、节点合并、二者组合或预算调整方案。范围收缩要求保留全部必要节点；节点合并要求满足输入及参数一致性；预算调整要求满足逐单元的上下界。规划器检查分组是否完整覆盖实际处理集合，并拒绝不满足领域语义的变换组合。
++
++候选方案的计算代价按式~\eqref{eq:framework_unified_cost}~计算，其中既包含节点执行权重，也包含在线结构组织的计数开销。原型在每个任务内部比较候选方案，选择估计代价较低的合法方案；当候选方案没有收益时保留参考方案，代价相同时也优先选择参考方案。该过程将形式化框架中的优化目标落实为有限候选方案比较。
++
++统一执行入口完成方案检查后调用领域后端，并分别记录任务准备、方案规划和计算执行的耗时。结果验证使用各任务的完整执行结果作为参照；对于超出近似误差阈值的输出，重新执行完整方案，并保留首次尝试及回退的记录。这样，方案选择、执行、约束检查和性能记录形成共同的处理流程。
++
++\subsection{领域适配与约束保持}
++
++动态图适配器维护固定地标到各顶点的精确距离。构造图由主干及若干仅通过一个边界顶点连接的局部块组成，地标位于主干。块内边更新不能改变块外顶点到主干地标的距离，因此适配器识别更新所在块，将相应顶点提交为实际处理范围，由稳定边界距离初始化局部修复。出现跨块更新或分区条件不成立时，适配器提交完整处理范围。分区检查、邻接复制和任务表示构建均计入在线准备时间。
++
++逻辑查询适配器将每条查询展开为算子图，公共规划器依据结构等价类识别重复的实体访问和关系投影前缀。前向阶段每组只执行一次并向各分支提供结果，反向阶段先汇总所有分支对代表节点的梯度，再向前驱和参数传播。训练任务以损失、实体梯度、关系梯度及参数更新的一致性为约束；增量求值任务则通过输入版本和参数快照判断缓存是否有效。
++
++视频适配器以去噪步作为计算单元，并将该步执行完整键值计算的注意力块数作为预算。精确块使用完整键和值，其他块使用带块大小权重的均值近似，从而使预算直接改变参与注意力运算的矩阵规模。适配器依据离线校准轨迹生成阶段敏感度信号，由公共预算分配器按增加预算的边际收益提出候选；再通过实际校准输出选择满足误差要求的预算配置。在线执行使用固定的校准配置，并在留出输入上核验误差。
++
++\section{原型验证与结果分析}
++\label{sec:prototype_evaluation}
++
++\subsection{实验设置与评价方法}
++
++实验采用 CPU 仿真，运行环境为 ARM 体系结构、18个逻辑处理器的 macOS 系统，使用 Python~3.12.14 和 NumPy~2.3.5，并将数值库的线程数限制为1。所有输入均由固定配置构造，输入随机种子为7、19、31、43和59。每种条件预热2次后计时7次，执行方案顺序按种子确定性打乱。表~\ref{tab:prototype_workloads}~概括各类输入和对照设置，共形成330条条件记录和2310次计时工作负载运行。
++
++\begin{table}[htbp]
++    \centering
++    \caption{工程原型的构造任务与验证设置}
++    \label{tab:prototype_workloads}
++    \scriptsize
++    \setlength{\tabcolsep}{4pt}
++    \renewcommand\arraystretch{1.2}
++    \begin{tabular}{p{2.0cm}p{6.6cm}p{3.5cm}c}
++        \toprule
++        任务 & 输入与变化条件 & 对照设置 & 记录数 \\
++        \midrule
++        动态图维护 & 2080个顶点、32个局部块、4个地标；更新1、8或全部32个块，以及跨块更新 & 完整重算、自动选案 & 40 \\
++        逻辑查询训练 & 128个实体、6类关系、384条查询、48维表示；公共前缀组数为8、64和384 & 完整执行、自动选案；连续6轮更新 & 30 \\
++        增量查询组合 & 384条查询；公共前缀组数为8和128；输入变化比例为0、12.5\%、50\%和100\% & 完整重算、仅收缩、仅合并、组合及自动选案 & 200 \\
++        视频张量去噪 & 4帧或8帧、每帧$4\times4$个词元、12维潜变量；12步或20步去噪，含同质及严格误差情形 & 全注意力、固定预算、阶段预算 & 60 \\
++        \bottomrule
++    \end{tabular}
++\end{table}
++
++动态图输入包含局部随机连接及批量边插入、删除，完整广度优先搜索作为重建参照。知识图谱输入为每个实体和关系组合构造3个尾实体，查询正样本取自集合语义答案，8个负样本取自答案补集；数值计算采用实体向量、关系矩阵、双曲正切投影、均值交集、逐维最大值并集和取负操作，并使用二元交叉熵训练。视频输入由随时间变化的纹理潜变量及高斯噪声构成，使用固定投影矩阵执行块注意力和逐步状态更新。
++
++动态图逐项比较全部地标距离；逻辑查询逐轮比较前向结果、损失及反向梯度，并检查连续6轮更新后的参数，误差容限为$10^{-11}$；视频输出使用相对全注意力参考结果的潜变量均方根误差（Root Mean Square Error，RMSE），另记录跨帧差分误差。视频预算使用101、102和103三个种子离线校准，与留出输入不重叠，常规质量阈值设为0.004，严格误差情形设为$10^{-9}$。校准阶段以质量阈值的70\%作为预算选择条件，为留出输入保留余量。
++
++加权计算代价依据各任务的算子权重和结构组织计数计算，实际执行记录还包括顶点访问、边检查、算子调用和注意力交互对数。端到端耗时包含适配、规划、方案校验、内核执行及训练参数更新；结果对照验证单独计时。初始索引、增量求值的初始缓存及离线预算校准作为预处理，校准耗时另行保存。每个输入种子的重复耗时先取均值，再计算同一种子下的加速比，最后对5个种子报告均值与样本标准差。
++
++\subsection{三类任务的执行结果与结构收益}
++
++表~\ref{tab:prototype_simulation_results}~给出代表性构造输入上的结果。全部条件均通过对应的结果约束检查；动态图距离与完整重建一致，逻辑训练的损失、梯度和参数更新最大偏差小于$5.0\times10^{-16}$，常规视频输入的阶段预算输出满足0.004的潜变量 RMSE 阈值。不同任务的加权代价分别在各自的计算口径内比较。
 +
 +\input{structure_aware_prototype/results/full/thesis_results.tex}
 +
-+在代表性的增量查询输入上，仅范围收缩、仅节点合并与组合执行相对完整重算的加权计算代价分别下降82.1\%、73.7\%和89.4\%，表明两类变换可以在同一计算图上共同减少计算。对应的端到端加速比分别为1.76、1.25和1.61，说明组合方案带来的计算节省仍受到结构分析与执行组织开销的影响。全局图更新、同质去噪阶段和严格误差阈值等情形也显示，结构收益减弱时，在线规划开销可能抵消计算优化收益。因此，原型同时记录加权代价和实测时间，以区分计算机制的有效性与具体实现的端到端表现。
++表~\ref{tab:prototype_structure_effects}~进一步比较拓扑局部性和逻辑复用程度的影响。仅1个局部块更新时，实际处理范围为64个顶点，加权计算代价下降71.9\%，端到端加速比为1.88；更新8个块时，处理范围增大为512个顶点，代价下降比例和加速比分别减小至50.1\%和1.28。全部局部块更新或出现跨块更新时，规划器选择完整执行，表现出依赖局部性对范围收缩收益的影响。
 +
-+上述原型为统一框架提供了公共执行机制、多领域适配和组合变换的工程证据。其验证范围是三类核心机制在构造任务中的执行效果：动态图仿真尚未实现 FulBM 的全部覆盖标签与路径强弱维护，逻辑查询采用小型可微嵌入模型，视频仿真使用合成潜变量及低维去噪计算，未接入真实 DiT 权重。因此，仿真结果用于支持统一框架的可实现性与可组合性，真实模型上的生成质量、原始 GPU 系统性能及三项完整算法在单一业务链路中的联合收益仍需进一步验证。
++\input{structure_aware_prototype/results/full/chapter_structure_effects.tex}
 +
- \section{论文组织结构}
++在384条训练查询中，公共前缀组数为8时，分组执行数量平均约为516组，相对平均约1802个独立计算单元明显减少，加权计算代价下降76.1\%，端到端加速比为1.90。组数增至64和384后，可共享计算减少，代价下降比例依次减至61.5\%和16.2\%，加速比也减至1.58和1.07。前向和反向的一致性检查表明，共享计算及梯度汇总在上述条件下保持了训练过程。
++
++表~\ref{tab:prototype_video_budget}~比较不同阶段条件下的预算配置。异质阶段中，固定预算方案共使用168个精确块，阶段预算方案使用76个，相对完整预算192个均有减少；在留出误差满足要求时，阶段预算的加权代价下降32.4\%。较长序列中，阶段预算从完整配置的640个块降至238个，对应代价下降39.3\%和1.23的端到端加速比。同质阶段的预算差异缩小，而严格误差情形采用完整预算，体现了预算分配收益与阶段差异及质量要求的关系。
++
++\input{structure_aware_prototype/results/full/chapter_video_budget.tex}
++
++\subsection{范围收缩与节点合并的组合验证}
++
++组合实验固定模型参数，先建立查询结果缓存，再改变部分查询的输入。公共依赖传播识别失效闭包，范围收缩只执行该闭包；节点合并在当前输入对应的计算图上识别公共子表达式；组合执行先确定范围，再对范围内的节点分组。参数快照变化时相关计算全部失效，训练模式则禁止通过跨批次前向缓存跳过梯度贡献。
++
++表~\ref{tab:prototype_composition}~给出8组公共前缀、12.5\%查询输入变化时的组合结果。仅范围收缩将平均约1802个计算单元中的约222个纳入重算；仅节点合并在完整范围内形成约544组计算；组合执行进一步在重算范围内形成约100组计算。三种方案相对完整重算的加权代价分别下降82.1\%、73.7\%和89.4\%，全部查询输出保持一致，说明两类执行变换可以在同一计算图中共同作用。
++
++\input{structure_aware_prototype/results/full/chapter_composition.tex}
++
++输入变化比例增大时，范围收缩的收益逐步降低。在8组公共前缀条件下，输入变化比例为50\%时，组合执行的代价下降82.6\%；所有输入均变化后，仅范围收缩已没有有效收益，自动规划器选择节点合并。输入完全不变时，自动规划器选择仅使用缓存的范围方案，避免继续执行没有必要的合并分析。这些结果表明，处理范围会改变后续分组的对象，公共规划器能够依据同一结构描述选择不同的变换组合。
++
++\subsection{规划开销与端到端表现}
++
++组合变换减少的计算量与实际耗时之间仍受组织开销影响。表~\ref{tab:prototype_composition}~中，固定组合方案的内核执行耗时约为0.297\,ms，低于仅范围收缩的0.434\,ms，但准备和规划开销使其端到端加速比为1.61，低于仅范围收缩的1.76。自动选案执行同样的组合计算，规划耗时约为1.332\,ms，占总耗时约39.2\%，其端到端加速比为1.25。这说明候选方案比较具有实际成本，需要与节点计算收益一并考虑。
++
++在全局图更新条件下，自动规划器与参考方案均执行完整计算，但自动方案仍承担候选比较开销，其加速比为0.87；严格误差要求下的视频任务也选择完整预算，加速比约为0.98。同质去噪阶段的加速比接近1。原型因此同时记录加权代价与实测时间，前者用于比较结构变换的计算收益，后者检验当前实现中的净效果。
++
++原型已在候选方案之间复用结构等价分析及分组结果，减少重复规划；后续仍可根据任务规模和执行历史调整候选数量，并将内核测量结果用于校准代价参数。全部输入、方案、误差、逐次计时样本和源文件摘要均随实验保存，330条记录已通过完整覆盖和汇总一致性核验，另有17项检查验证独立最短路结果、数值梯度、缓存失效、预算守恒及误差超限回退。
++
++\section{适用边界与讨论}
++\label{sec:formal_framework_boundary}
++
++上述形式化框架具有一定的适用边界，对于具有以下三类特点的任务，其优化空间较为有限。
++
++第一，结构较为简单的任务。一种情况是计算单元及其依赖关系固定。例如，仅包含少量算术操作的固定计算流程，各计算单元均直接参与结果计算，也不存在重复的中间结果，因而难以通过缩小计算范围或合并计算单元进一步降低计算代价；另一种情况是各计算单元的属性较为单一，难以通过差异化配置计算单元来提升整体效率的任务。例如，对不同计算单元执行相同处理规则，各单元所需的计算预算接近，因而通过重新分配预算获得的收益有限。
++
++第二，对结果准确性要求极高，难以容忍近似误差的任务。例如，高精度数值求解、对误差累积敏感的长期科学仿真，以及需要严格控制数值误差的工程计算。在这类任务中，减少必要计算、采用近似计算或降低计算精度都可能影响结果的可靠性，通过结构感知优化实现高效推理受到较强约束。
++
++第三，瓶颈主要来自输入数据规模庞大的任务。例如，海量日志的全量统计、无筛选条件的数据库全表扫描，以及缺少稀疏性的大规模稠密数据处理。这类任务的计算需求主要随数据规模增长，难以仅通过结构感知显著减少必要的数据访问与计算，其主要优化手段通常包括增加计算资源，采用数据并行、任务并行及分布式处理，改善数据的计算、存储与传输效率。
++
++上述任务特征分别限制范围收缩、节点合并或预算调整的收益；实际应用还需将在线结构识别和执行组织开销纳入代价判断。本章原型采用构造任务的 CPU 仿真验证核心机制，完整模型和业务链路中的联合部署效果仍需进一步验证。
++
++\section{本章小结}
++
++本章建立了结构感知高效推理的形式化框架，将拓扑、逻辑和时序依赖统一表示为推理依赖图，并将范围收缩、节点合并和预算分配描述为任务约束下的执行变换。在此基础上实现公共任务表示、执行规划、领域适配和结果验证模块，完成三类任务的执行检查及范围与分组的组合实验。实验显示，可利用的结构差异能够转化为计算收益，而端到端效果还受规划开销和任务约束影响。形式化描述、工程实现和约束验证共同构成了连接三项具体研究的分析与验证过程。
+--- a/Chapter/Chapter_introduction.tex
++++ b/Chapter/Chapter_introduction.tex
+@@ -72,9 +72,9 @@
  
- 本文研究逻辑与论文组织结构如图~\ref{fig:thesis_organization}~所示。全文共六章，具体安排如下：
-@@ -118,7 +163,7 @@
+ \section{研究内容与统一贡献}
+ 
+-本文研究三个代表性推理任务：动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频 DiT 稀疏注意力推理。图更新会改变最短路径及其标签覆盖关系，逻辑组合会决定查询计算图和数据访问方式，视频去噪阶段及空间、时间依赖会影响注意力计算需求。围绕这些结构特征，本文分别研究如何减少全量重建、重复计算、数据等待和固定稀疏配置造成的资源错配，并在正确性、训练语义或生成质量约束下提升推理效率。
++本文研究三个代表性推理任务：动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频 DiT 稀疏注意力推理。图更新会改变最短路径及其标签覆盖关系，逻辑组合会决定查询计算图和数据访问方式，视频去噪阶段及空间、时间依赖会影响注意力计算需求。围绕这些结构特征，本文分别研究如何减少全量重建、重复计算、数据等待和固定稀疏配置造成的资源错配，并在正确性、训练语义或生成质量约束下提升推理效率。在此基础上，进一步研究结构感知高效推理的形式化框架和原型验证，形成三项具体方法与一项统一抽象及验证相结合的四项研究内容。
+ 
+-图~\ref{fig:research_content_overview}~从关键科学问题、研究内容、分析结构、优化策略和约束验证五个方面展示了本文三项研究从科学问题到研究内容的对应关系。图的上部给出三个关键科学问题：面向拓扑结构演化的计算范围确定问题、逻辑结构共性驱动的计算过程合并问题和去噪时序结构感知的计算资源分配问题；三类任务的主导结构依次由图顶点的连接关系扩展到逻辑算子连接关系和去噪步之间的时序关系。围绕这些结构，本文采用统一的结构感知高效执行策略，将结构规律转化为确定推理范围、推理编排和资源分配的依据。
++图~\ref{fig:research_content_overview}~从关键科学问题、研究内容、分析结构、优化策略和约束验证五个方面展示了三类具体研究及其与形式化框架和原型验证的联系。图的上部给出三个关键科学问题：面向拓扑结构演化的计算范围确定问题、逻辑结构共性驱动的计算过程合并问题和去噪时序结构感知的计算资源分配问题；三类任务的主导结构依次由图顶点的连接关系扩展到逻辑算子连接关系和去噪步之间的时序关系。围绕这些结构，本文采用统一的结构感知高效执行策略，将结构规律转化为确定推理范围、推理编排和资源分配的依据。
+ 
+ \begin{figure}[htbp]
+     \centering
+@@ -107,63 +107,26 @@
+ 
+ 本文提出精确预算分配稀疏注意力机制 PASA，将去噪时序结构分析用于精确注意力计算资源的分配。该方法以相邻去噪步速度场预测值的差异刻画去噪轨迹曲率，据此在给定总精确块数下分配逐去噪步预算，为变化较大的阶段分配更多精确计算，并结合选择边界软化与分组一阶补偿完成精确块选择和未选块近似。通过在相同预算下比较输出保真度，并结合视频质量指标检验生成结果，验证动态预算分配能否更有效地利用有限计算资源，同时保持视频生成质量。
+ 
+-\section{统一工程原型与融合验证}
+-\label{sec:structure_aware_prototype}
++\subsection{研究内容四：结构感知高效推理的形式化框架和原型验证}
+ 
+-为进一步验证三项研究之间的共性联系，本文实现结构感知高效推理工程原型，将计算范围确定、计算过程合并和计算预算分配纳入同一套任务表示、执行规划与结果验证流程。原型以三项研究的核心结构感知机制为适配对象，通过构造输入上的 CPU 仿真，考察统一框架的工程可实现性以及不同执行变换的可组合性。第~\ref{sec:formal_framework}~节进一步给出这些机制的形式化描述。
++本研究内容在前三项具体研究的基础上，研究结构信息如何形成统一的计算描述和执行机制。动态图中的拓扑依赖、逻辑查询中的算子依赖和视频去噪中的时序依赖虽然表现形式不同，但均可用于分析计算的必要性、可复用性和收益贡献。需要进一步建立共同的代价表达，并通过工程原型检验这些结构规律能否转化为可执行的优化方案。
+ 
+-图~\ref{fig:structure_aware_prototype}~展示了原型的系统架构。领域适配器将动态图维护、知识图谱逻辑查询训练和视频生成任务描述为计算单元及其依赖关系，并提供单元属性、计算代价与任务约束。公共规划器据此生成实际处理范围、节点分组和计算预算，比较合法候选方案的代价，再通过统一执行入口调用对应的领域后端。不同候选方案共用结构等价分析结果，以减少重复规划开销；完整执行方案始终保留，在候选方案缺少收益或不满足约束时提供回退路径。
++该研究内容包括三个方面。第一，将三类结构统一表示为推理依赖图，以计算范围、节点分组和计算预算刻画执行过程，建立正确性、训练语义或生成质量要求下的形式化框架。第二，实现共享任务表示、执行规划、领域适配和结果验证的工程原型，将范围收缩、节点合并及预算分配接入统一流程。第三，在三类构造任务及增量逻辑查询组合实验中比较执行结果、计算代价和端到端耗时，分析结构差异、任务约束和规划开销对收益的影响。
++
++本文由此形成从具体方法到统一抽象、再到原型验证的研究内容。第~\ref{chap:formal_framework_prototype}~章详细介绍形式化框架、工程原型和实验结果，并讨论其适用边界。
++
++\section{论文组织结构}
++
++本文研究逻辑与论文组织结构如图~\ref{fig:thesis_organization}~所示。全文共七章，具体安排如下：
+ 
+ \begin{figure}[htbp]
+     \centering
+-    \begin{tikzpicture}[
+-        font=\small,
+-        taskbox/.style={draw, rounded corners=2pt, align=center, minimum height=0.85cm, text width=3.5cm},
+-        widebox/.style={draw, rounded corners=2pt, align=center, minimum height=0.95cm, text width=11.8cm},
+-        >=Stealth]
+-        \node[taskbox] (dynamic) at (-4.2,0) {动态图维护\\拓扑传播依赖};
+-        \node[taskbox] (logical) at (0,0) {逻辑查询训练\\算子计算依赖};
+-        \node[taskbox] (video) at (4.2,0) {视频张量去噪\\去噪步时序依赖};
+-        \node[widebox] (structure) at (0,-1.5) {领域适配与统一任务表示\\计算单元、依赖关系、属性、代价与约束};
+-        \node[widebox] (planner) at (0,-3.1) {公共执行规划器\\范围收缩、节点合并、预算分配与候选方案比较};
+-        \node[widebox] (execution) at (0,-4.7) {领域执行后端与统一验证记录\\结果误差、实际执行计数与端到端耗时};
+-        \draw[->] (dynamic.south) -- ([xshift=-4.2cm]structure.north);
+-        \draw[->] (logical.south) -- (structure.north);
+-        \draw[->] (video.south) -- ([xshift=4.2cm]structure.north);
+-        \draw[->] (structure.south) -- (planner.north);
+-        \draw[->] (planner.south) -- (execution.north);
+-        \draw[->] (execution.east) -- ++(0.5,0) |- (planner.east);
+-    \end{tikzpicture}
+-    \caption{结构感知高效推理统一工程原型}
+-    \label{fig:structure_aware_prototype}
+-\end{figure}
+-
+-三类领域适配分别落实不同的结构利用方式。动态图适配器在具有单边界局部块的构造图上维护精确地标距离，利用局部更新不改变块外距离的结构性质缩小重算范围，出现跨块更新或分区条件失效时采用全图重算。逻辑查询适配器在构造知识图谱上生成包含关系投影、交集、并集和否定的训练查询，通过公共子表达式分组减少重复计算，并汇总共享节点的分支梯度。视频适配器对合成时空潜变量执行块注意力与迭代去噪，依据离线校准轨迹的阶段差异生成逐步预算，以全注意力输出作为数值参考检查近似误差。三类任务共用方案表示、变换规则接口、代价比较及验证记录机制，领域后端负责具体计算与语义约束。
+-
+-为验证执行变换之间的组合关系，原型进一步构造带有公共逻辑前缀的增量查询批次。在模型参数固定的条件下，部分查询输入变化后，先通过公共依赖传播确定缓存失效范围，再在需要重算的范围内合并等价计算。实验分别设置完整重算、仅范围收缩、仅节点合并、组合执行和自动选案，并改变输入变化比例及公共前缀的复用程度，检验两类变换是否能够共同降低计算代价。该实验中的缓存依赖输入版本和参数快照；参数变化后相关计算全部失效，训练任务不通过跨批次前向缓存跳过梯度计算。
+-
+-仿真实验采用5个输入随机种子，每种条件预热2次并重复计时7次，共形成330条任务情形、输入种子与执行方案的组合记录。逻辑查询训练连续执行6轮参数更新，逐轮比较前向结果、损失与反向梯度，并检查最终参数；动态图维护比较全部地标距离；视频张量去噪在与校准种子不重叠的留出输入上检查潜变量均方根误差（Root Mean Square Error，RMSE）。视频预算使用另外3个输入种子离线校准，校准开销单独记录，不计入在线执行时间。增量查询的初始缓存和动态图的初始索引均作为预处理状态提供。
+-
+-表~\ref{tab:prototype_simulation_results}~给出代表性构造输入上的仿真结果。加权计算代价依据各任务内部的算子权重及结构组织计数计算，端到端耗时则包含任务适配、方案规划与校验、计算执行及训练参数更新；结果对照验证的耗时单独保存。表中的代价下降比例和加速比均先按输入种子计算，再对5个种子取均值，完整记录同时保存逐次计时样本、种子间标准差、实际执行计数和误差。原型保留全局更新、较低复用程度、同质去噪阶段及严格误差阈值等情形，用于考察结构收益减弱和规划开销占比上升时的表现。
+-
+-\input{structure_aware_prototype/results/full/thesis_results.tex}
+-
+-在代表性的增量查询输入上，仅范围收缩、仅节点合并与组合执行相对完整重算的加权计算代价分别下降82.1\%、73.7\%和89.4\%，表明两类变换可以在同一计算图上共同减少计算。对应的端到端加速比分别为1.76、1.25和1.61，说明组合方案带来的计算节省仍受到结构分析与执行组织开销的影响。全局图更新、同质去噪阶段和严格误差阈值等情形也显示，结构收益减弱时，在线规划开销可能抵消计算优化收益。因此，原型同时记录加权代价和实测时间，以区分计算机制的有效性与具体实现的端到端表现。
+-
+-上述原型为统一框架提供了公共执行机制、多领域适配和组合变换的工程证据。其验证范围是三类核心机制在构造任务中的执行效果：动态图仿真尚未实现 FulBM 的全部覆盖标签与路径强弱维护，逻辑查询采用小型可微嵌入模型，视频仿真使用合成潜变量及低维去噪计算，未接入真实 DiT 权重。因此，仿真结果用于支持统一框架的可实现性与可组合性，真实模型上的生成质量、原始 GPU 系统性能及三项完整算法在单一业务链路中的联合收益仍需进一步验证。
+-
+-\section{论文组织结构}
+-
+-本文研究逻辑与论文组织结构如图~\ref{fig:thesis_organization}~所示。全文共六章，具体安排如下：
+-
+-\begin{figure}[htbp]
+-    \centering
+-    \includegraphics[width=0.98\textwidth]{resources/figures/thesis_organization_standalone.pdf}
++    \resizebox{0.98\textwidth}{!}{\input{resources/figures/thesis_organization.tex}}
+     \caption{本文研究逻辑与论文组织结构}
      \label{fig:thesis_organization}
  \end{figure}
  
--第一章，绪论。阐述研究背景与意义，说明拓扑、逻辑和时序结构对推理效率的影响，提出动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频 DiT 稀疏注意力三个关键问题，并概括研究内容与主要贡献。
-+第一章，绪论。阐述研究背景与意义，说明拓扑、逻辑和时序结构对推理效率的影响，提出动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频 DiT 稀疏注意力三个关键问题，概括研究内容与主要贡献，并介绍统一工程原型及其仿真融合验证。
+-第一章，绪论。阐述研究背景与意义，说明拓扑、逻辑和时序结构对推理效率的影响，提出动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频 DiT 稀疏注意力三个关键问题，概括研究内容与主要贡献，并介绍统一工程原型及其仿真融合验证。
++第一章，绪论。阐述研究背景与意义，说明拓扑、逻辑和时序结构对推理效率的影响，提出动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频 DiT 稀疏注意力三个关键问题，概括研究内容与主要贡献，明确形式化框架和原型验证的研究内容。
  
  第二章，相关工作综述。综述动态图最短路径、基于嵌入的知识图谱复杂逻辑查询训练和视频 DiT 稀疏注意力，分析现有方法在更新影响范围识别、逻辑查询训练效率和注意力计算等方面的优点和不足。
  
---- a/Chapter/Chapter_nomeclature.tex
-+++ b/Chapter/Chapter_nomeclature.tex
-@@ -15,6 +15,7 @@
-     \endfoot
-     \bottomrule
-     \endlastfoot
-+    RMSE & 均方根误差（Root Mean Square Error），原型中用于度量潜变量相对全注意力参考输出的偏差 & 工程原型 \\
-     $\mathcal{G}_{\mathrm{s}}$ & 由推理单元及其依赖关系构成的推理依赖图 & 形式化框架 \\
-     $\mathcal{U}_{\mathrm{s}},\mathcal{E}_{\mathrm{s}}$ & 推理单元集合和单元之间的依赖关系集合 & 形式化框架 \\
-     $u,\omega_u$ & 推理单元及其计算代价 & 形式化框架 \\
+@@ -173,4 +136,6 @@
+ 
+ 第五章，时序结构感知的视频 DiT 稀疏注意力高效推理。聚焦固定稀疏预算与阶段性计算需求不匹配的问题，介绍 PASA 如何依据离散去噪轨迹曲率，在给定总精确计算量下生成逐去噪步预算，并以保持视频生成质量为约束，利用选择边界软化和分组一阶补偿保障块级执行质量。
+ 
+-第六章，总结与展望。总结全文工作，归纳共性研究方法并建立形式化框架，讨论应用价值，展望结构感知高效推理的后续研究方向。
++第六章，结构感知高效推理的形式化框架和原型验证。建立推理依赖图及统一计算代价描述，实现公共执行规划与三类领域适配，通过仿真实验验证结果约束、结构收益及组合变换，并讨论形式化框架的适用边界。
++
++第七章，总结与展望。总结四项研究内容，归纳共性研究方法与统一贡献，讨论应用价值，展望结构感知高效推理的后续研究方向。
+--- a/Chapter/Chapter_conclusion.tex
++++ b/Chapter/Chapter_conclusion.tex
+@@ -3,13 +3,15 @@
+ 
+ \section{总结}
+ 
+-本文围绕“基于结构感知的高效推理关键技术研究”这一主题，研究动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频 DiT 稀疏注意力推理三类任务。三类任务分别具有拓扑、逻辑和时序结构，且其效率瓶颈均与结构特征和执行方式之间的错配有关。本文将这些结构信息转化为计算范围约束、公共计算复用和动态预算分配，在保证正确性或生成质量的前提下减少冗余计算和低效访存。
++本文围绕“基于结构感知的高效推理关键技术研究”这一主题，研究动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频 DiT 稀疏注意力推理三类任务。三类任务分别具有拓扑、逻辑和时序结构，且其效率瓶颈均与结构特征和执行方式之间的错配有关。本文将这些结构信息转化为计算范围约束、公共计算复用和动态预算分配，在保证正确性或生成质量的前提下减少冗余计算和低效访存，并进一步建立形式化框架与工程原型，形成三类具体任务研究和统一验证相结合的四项研究内容。
+ 
+ 在动态图最短路径索引维护方面，本文提出 FulBM 方法。该方法根据边插入和边删除影响传播的不对称性，将全批量更新处理拆分为 InsBM 和 DelBM，并分别设计标签受影响顶点搜索、路径强弱性质更新和剪枝策略。FulBM 以标签受影响顶点集合刻画更新影响范围，使维护范围更接近实际标签项变化范围。实验表明，FulBM 在保持维护索引与更新后图上的重建索引严格一致的前提下，在混合更新实验中相对 BatchHL 的加速比约为 5.6～228.6 倍。
+ 
+ 在知识图谱复杂逻辑查询训练方面，本文提出 FlashEKGR 系统。该系统利用查询计算图中的公共逻辑前缀实现逻辑算子并行，通过无过期嵌入流水线使数据加载和计算重叠执行，并借助布局感知内核与动态 CUDA Graph 缓存提高 GPU 执行效率。FlashEKGR 在系统层利用查询逻辑信息，使逻辑分支中的公共计算得到复用。实验表明，FlashEKGR 在保持训练语义和模型精度的同时，相对最优基线的最高训练加速比达到 5.67 倍。
+ 
+ 在视频 DiT 稀疏注意力推理方面，本文提出免训练的精确预算分配稀疏注意力机制 PASA。该机制将相邻去噪步速度场预测值的 $L_1$ 距离定义为离散去噪轨迹曲率，并在给定总精确块数下依据曲率生成逐去噪步预算。预算确定后，选择边界软化用于调整执行精确计算的块集合，分组一阶补偿用于近似未选块的注意力贡献。在与固定预算 PISA 保持相同平均稀疏度和预热比例时，PASA 的端到端生成延迟与 PISA 相近，并在三个模型上减小了多项指标相对于全量注意力输出的偏差；与全量注意力相比，三个模型上的端到端推理加速比分别达到 1.61 倍、2.13 倍和 2.34 倍。
++
++在形式化框架和原型验证方面，本文将三类任务表示为推理依赖图，以计算范围、节点分组和计算预算建立统一的计算代价描述，并实现公共规划与三类领域适配。在5个输入种子的 CPU 仿真中，验证地标距离、逻辑训练损失、梯度和参数更新的一致性，以及视频潜变量相对全注意力输出的误差。增量查询组合实验进一步表明，范围收缩与节点合并能够在同一计算图上共同作用，代表性条件下加权计算代价下降89.4\%。该研究内容为三项具体方法提供了统一的形式化解释及工程验证。
+ 
+ % \section{创新点总结}
+ 
+@@ -23,7 +25,7 @@
+ 
+ \section{共性研究方法}
+ 
+-三项研究围绕结构规律与推理策略之间的不一致，形成了由计算范围、计算过程到计算资源的递进关系。FulBM 首先研究计算范围如何确定，通过分析动态图的拓扑变化，将索引维护范围缩小到可能受影响的顶点及其传播边界，解决“哪些计算需要执行”的问题。FlashEKGR 在必要计算已经确定的基础上，进一步研究计算过程如何组织，通过识别复杂逻辑查询中的公共子结构，合并相同计算路径并协同优化数据流和 GPU 执行，解决“必要计算如何高效执行”的问题。PASA 则面向总精确计算预算固定、不同去噪阶段计算需求不均衡的场景，研究计算资源如何分配，通过分析视频去噪过程的时序变化，将有限的精确注意力预算配置到对生成质量影响更大的去噪步。三项工作依次从消除计算范围冗余，发展到消除计算过程冗余，再到提高单位计算资源的推理收益，构成逐层深入的结构感知优化路线。
++前三项研究围绕结构规律与推理策略之间的不一致，形成了由计算范围、计算过程到计算资源的递进关系。FulBM 首先研究计算范围如何确定，通过分析动态图的拓扑变化，将索引维护范围缩小到可能受影响的顶点及其传播边界，解决“哪些计算需要执行”的问题。FlashEKGR 在必要计算已经确定的基础上，进一步研究计算过程如何组织，通过识别复杂逻辑查询中的公共子结构，合并相同计算路径并协同优化数据流和 GPU 执行，解决“必要计算如何高效执行”的问题。PASA 则面向总精确计算预算固定、不同去噪阶段计算需求不均衡的场景，研究计算资源如何分配，通过分析视频去噪过程的时序变化，将有限的精确注意力预算配置到对生成质量影响更大的去噪步。三项工作依次从消除计算范围冗余，发展到消除计算过程冗余，再到提高单位计算资源的推理收益，构成逐层深入的结构感知优化路线。
+ 
+ 优化维度的递进也伴随着任务约束的变化。FulBM 面向动态图中的最短路径/距离查询，范围收缩必须保持维护索引与更新后图上的重建索引严格一致；FlashEKGR 面向知识图谱复杂推理模型训练，路径合并和系统优化必须保持训练语义和模型精度；PASA 面向视频生成模型推理，需要保持的任务约束是视频生成质量。三项研究在各自任务允许的约束边界内，使推理策略更充分地利用拓扑、逻辑和时序结构，提高推理的效率。
+ 
+@@ -57,6 +59,8 @@
+ 
+ 统一来看，结构感知加速的关键在于识别任务结构中计算需求与优化收益的差异性，并据此优化计算范围、执行方式和资源配置。FulBM 利用边插入与边删除在影响和传播机制上的差异，以及不同顶点受路径变化影响程度的差异，识别传播边界并剪枝无关顶点。FlashEKGR 利用不同推理路径在复用条件上的差异，合并关系投影分支等公共逻辑结构，并分别处理交集、并集等依赖具体分支语义的后续结构。PASA 利用不同去噪步的精确计算对视频生成质量贡献的差异，将更多精确计算资源分配给质量提升收益较高的阶段。因此，结构感知优化并非简单减少计算，而是利用结构差异区分计算的必要性、可复用性和收益贡献，使推理策略与任务中实际存在的计算需求相匹配。
+ 
++第~\ref{chap:formal_framework_prototype}~章将上述共性研究方法落实为形式化框架与公共执行机制：用依赖图描述三类结构，以范围、分组和预算刻画执行方案，并通过多领域适配与组合实验检查计算收益和结果约束。研究内容四由此承接前三项具体研究，使共性方法具有明确的代价表达和工程验证依据。
++
+ % \section{工程实践启示}
+ 
+ % 本文研究也给智能推理系统的工程实现带来若干启示。
+@@ -66,96 +70,6 @@
+ % 第二，结构信息需要以可执行形式传递到系统层。仅在论文分析中指出存在公共前缀、局部影响区域或动态预算并不足够，必须将其转化为队列、缓存、索引状态、CUDA Graph key 或预算表等可被系统直接使用的数据结构。FulBM 的受影响顶点集合、FlashEKGR 的查询结构签名和 PASA 的去噪步预算表，都是这种转化的具体例子。
+ 
+ % 第三，正确性和质量约束应在设计初期进入系统边界。若在速度优化完成后才补充正确性检查，方法往往难以部署。FulBM 在设计初期要求与重建索引一致，FlashEKGR 在设计初期要求嵌入无过期的训练语义，PASA 在设计初期关注视频时序质量而不仅是单帧误差。这种约束前置有助于形成可靠系统。
+-
+-\section{形式化框架}
+-\label{sec:formal_framework}
+-本小节对“结构感知的高效推理方法”做了形式化。首先将拓扑、逻辑和时序结构统一表示为推理依赖图，然后建立总计算代价模型，最后刻画范围收缩、节点合并与预算分配三类优化策略，并归纳其统一优化目标。
+-为统一描述拓扑、逻辑和时序结构，将推理单元集合记为 $\mathcal{U}_{\mathrm{s}}$，单元之间的依赖关系集合记为 $\mathcal{E}_{\mathrm{s}}$，由二者构成的推理依赖图记为 $\mathcal{G}_{\mathrm{s}}$，即
+-\begin{equation}
+-    \mathcal{G}_{\mathrm{s}}=(\mathcal{U}_{\mathrm{s}},\mathcal{E}_{\mathrm{s}})\cmathstop
+-    \label{eq:framework_structure_graph}
+-\end{equation}
+-拓扑结构通过图的边连接组织路径传播，逻辑结构通过有向无环图组织算子计算，时序结构通过链式依赖组织逐步去噪。表~\ref{tab:framework_structure_mapping} 给出了三类结构在推理依赖图中的对应关系。各推理单元同时关联其输入、状态和计算属性，为范围判定、计算合并及预算分配提供依据。
+-
+-\begin{table}[htbp]
+-    \centering
+-    \caption{三类结构在推理依赖图中的对应关系}
+-    \label{tab:framework_structure_mapping}
+-    \small
+-    \setlength{\tabcolsep}{4pt}
+-    \renewcommand\arraystretch{1.2}
+-    \begin{tabular}{p{2.0cm}p{5.0cm}p{6.2cm}}
+-        \toprule
+-        结构类型 & 推理单元 $\mathcal{U}_{\mathrm{s}}$ & 依赖关系 $\mathcal{E}_{\mathrm{s}}$ \\
+-        \midrule
+-        拓扑结构 & 动态图顶点的标签状态处理 & 边连接所形成的路径传播依赖 \\
+-        逻辑结构 & 查询计算图中的逻辑算子调用 & 算子之间的输入输出依赖 \\
+-        时序结构 & 不同去噪步中的 DiT 模型调用 & 去噪步之间的状态与顺序依赖 \\
+-        \bottomrule
+-    \end{tabular}
+-\end{table}
+-
+-在同一任务内采用一致的计算代价口径，将一个推理单元记为 $u$，其计算代价记为 $\omega_u$，参考执行过程的总计算代价记为 $\mathcal{W}_0$，则
+-\begin{equation}
+-    \mathcal{W}_0=\sum_{u\in\mathcal{U}_{\mathrm{s}}}\omega_u\cmathstop
+-    \label{eq:framework_reference_cost}
+-\end{equation}
+-结构感知优化通过改变参与计算的单元范围、单元之间的组合方式及各单元的计算预算，降低满足任务要求所需的总计算代价。三项研究分别对应以下三种图上的执行变换。
+-
+-首先，依赖影响的差异决定计算范围。将实际处理的推理单元集合记为 $A_{\mathrm{s}}$，其为 $\mathcal{U}_{\mathrm{s}}$ 的子集；将节点计算之外的在线结构识别与编排代价记为 $\mathcal{W}_{\mathrm{a}}$，范围收缩后的总计算代价记为 $\mathcal{W}_{\mathrm{scope}}$，则
+-\begin{equation}
+-    \mathcal{W}_{\mathrm{scope}}
+-    =\mathcal{W}_{\mathrm{a}}+\sum_{u\in A_{\mathrm{s}}}\omega_u,
+-    \qquad A_{\mathrm{s}}\subseteq\mathcal{U}_{\mathrm{s}}\cmathstop
+-    \label{eq:framework_scope_cost}
+-\end{equation}
+-在动态图索引维护中，更新边与不同顶点之间的最短路径依赖不同，因此各顶点的标签状态受到更新影响的程度也不同。FulBM 根据边插入与边删除的传播规律，识别标签受影响顶点及其传播边界，使计算集中在需要检查与修复的范围内，并保持维护索引与更新后图上的重建索引一致。该变换利用拓扑依赖确定计算必要性，通过缩小 $A_{\mathrm{s}}$ 减少无关访问和重复传播。
+-
+-其次，逻辑计算的共性决定节点的合并方式。将 $A_{\mathrm{s}}$ 上满足依赖与语义要求的节点分组记为 $\mathcal{P}_{\mathrm{s}}$，其中一个合并组记为 $J$，该组合并执行的计算代价记为 $\omega_J$，节点合并后的总计算代价记为 $\mathcal{W}_{\mathrm{merge}}$，则
+-\begin{equation}
+-    \mathcal{W}_{\mathrm{merge}}
+-    =\mathcal{W}_{\mathrm{a}}+\sum_{J\in\mathcal{P}_{\mathrm{s}}}\omega_J\cmathstop
+-    \label{eq:framework_merge_cost}
+-\end{equation}
+-当多个节点具有相同算子、输入及参数状态时，公共计算只需执行一次，其结果由后续分支共享，反向传播时累加各分支的梯度贡献。将减少重复计算的合并条件表示为
+-\begin{equation}
+-    \omega_J<\sum_{u\in J}\omega_u\cmathstop
+-    \label{eq:framework_merge_gain}
+-\end{equation}
+-例如，从同一锚实体出发、沿同一关系执行投影的多个分支，可以合并其公共逻辑前缀。对于输入不同但依赖关系允许批量执行的同类算子，合并执行的收益来自减少算子调用与中间数据处理开销，以及提高并行执行效率。FlashEKGR 利用上述逻辑共性重组查询计算图，并协同优化嵌入加载、访存布局和执行图缓存，在保持训练语义与模型精度的前提下降低执行代价。
+-
+-最后，时序阶段的差异决定节点计算预算的分配。将推理单元的计算预算记为 $\beta_u$，该预算下的节点计算代价记为 $\omega_u(\beta_u)$，预算分配后的总计算代价记为 $\mathcal{W}_{\mathrm{alloc}}$，则
+-\begin{equation}
+-    \mathcal{W}_{\mathrm{alloc}}
+-    =\mathcal{W}_{\mathrm{a}}+\sum_{u\in\mathcal{U}_{\mathrm{s}}}\omega_u(\beta_u)\cmathstop
+-    \label{eq:framework_allocation_cost}
+-\end{equation}
+-对于视频 DiT 推理，节点预算对应各去噪步执行精确注意力的块数，节点代价包含该步的精确注意力、未选块近似及其他必要计算。不同去噪阶段对生成质量的影响不同，因此增加相同计算预算所带来的质量收益也不同。PASA 以离散去噪轨迹曲率为分配依据，为变化显著的阶段保留更多精确计算，减少变化平缓阶段的精确计算。在保持生成质量的条件下，通过提高平均稀疏度降低总计算代价。预算校准在线下完成，不计入本节的在线计算代价。
+-
+-\begin{samepage}
+-三类执行变换可统一为计算范围、节点分组和计算预算的联合选择。将合并组的预算记为 $\beta_J$，对应计算代价记为 $\omega_J(\beta_J)$，各组预算组成的向量记为 $\symbf{\beta}$，统一总计算代价记为 $\mathcal{W}(A_{\mathrm{s}},\mathcal{P}_{\mathrm{s}},\symbf{\beta})$，则
+-\begin{equation}
+-    \mathcal{W}(A_{\mathrm{s}},\mathcal{P}_{\mathrm{s}},\symbf{\beta})
+-    =\mathcal{W}_{\mathrm{a}}+
+-    \sum_{J\in\mathcal{P}_{\mathrm{s}}}\omega_J(\beta_J)\cmathstop
+-    \label{eq:framework_unified_cost}
+-\end{equation}
+-\end{samepage}
+-在满足索引正确性、训练语义或生成质量要求的条件下，优化目标为
+-\begin{equation}
+-    \min_{A_{\mathrm{s}},\mathcal{P}_{\mathrm{s}},\symbf{\beta}}
+-    \mathcal{W}(A_{\mathrm{s}},\mathcal{P}_{\mathrm{s}},\symbf{\beta})\cmathstop
+-    \label{eq:framework_optimization}
+-\end{equation}
+-其中，节点分组仅在实际处理集合上形成，每个保留节点归属一个合并组；未经合并的节点独立成组。FulBM 主要优化参与计算的节点范围，FlashEKGR 主要优化节点的合并与执行编排，PASA 主要优化节点的计算预算。三项工作分别利用依赖影响差异、逻辑计算共性和时序阶段差异，将结构信息转化为计算必要性、可复用性与收益贡献的判断依据，共同服务于任务约束下的计算代价降低。
+-
+-上述框架具有一定的适用边界，对于具有以下三类特点的任务，其优化空间较为有限。
+-
+-第一，结构较为简单的任务。一种情况是计算单元及其依赖关系固定。例如，仅包含少量算术操作的固定计算流程，各计算单元均直接参与结果计算，也不存在重复的中间结果，因而难以通过缩小计算范围或合并计算单元进一步降低计算代价；另一种情况是各计算单元的属性较为单一，难以通过差异化配置计算单元来提升整体效率的任务。例如，对不同计算单元执行相同处理规则，各单元所需的计算预算接近，因而通过重新分配预算获得的收益有限。
+-
+-第二，对结果准确性要求极高，难以容忍近似误差的任务。例如，高精度数值求解、对误差累积敏感的长期科学仿真，以及需要严格控制数值误差的工程计算。在这类任务中，减少必要计算、采用近似计算或降低计算精度都可能影响结果的可靠性，通过结构感知优化实现高效推理受到较强约束。
+-
+-第三，瓶颈主要来自输入数据规模庞大的任务。例如，海量日志的全量统计、无筛选条件的数据库全表扫描，以及缺少稀疏性的大规模稠密数据处理。这类任务的计算需求主要随数据规模增长，难以仅通过结构感知显著减少必要的数据访问与计算，其主要优化手段通常包括增加计算资源，采用数据并行、任务并行及分布式处理，改善数据的计算、存储与传输效率。
+ 
+ \section{应用价值}
+ 
+@@ -169,11 +83,11 @@
+ 
+ \section{问题与展望}
+ 
+-尽管本文已在三个方向上开展了系统研究，但基于结构感知的高效推理仍有若干值得进一步探索的问题。
++尽管本文已在三类任务及形式化框架和原型验证方面开展了研究，但基于结构感知的高效推理仍有若干值得进一步探索的问题。
+ 
+-第一，跨场景结构表示与自动优化仍有探索空间。本文分别针对拓扑、逻辑和时序结构设计了专门方法。未来可研究统一中间表示，将图更新传播、查询计算图和注意力稀疏模式纳入可组合的优化框架。
++第一，跨场景结构表示与自动优化仍有探索空间。第六章已建立形式化框架并实现公共任务表示，后续可进一步研究从真实系统中自动提取依赖关系、计算属性及语义约束，完善跨任务和跨设备的代价参数校准，并减少候选方案生成与选择的开销。
+ 
+-第二，结构感知加速与启发式策略可以进一步结合。本文的三项工作主要依赖可解释的结构规律和系统设计。未来可探索利用强化学习、代价模型或在线自适应策略选择最优预算、缓存粒度和执行计划，使系统能够根据数据分布、硬件状态和质量反馈动态调整。
++第二，结构感知加速与启发式策略可以进一步结合。本文的三项具体方法主要依赖可解释的结构规律和系统设计。未来可探索利用强化学习、代价模型或在线自适应策略选择最优预算、缓存粒度和执行计划，使系统能够根据数据分布、硬件状态和质量反馈动态调整。
+ 
+ 第三，面向大模型时代的推理系统需要更强的端到端协同。随着知识图谱、视频生成和大语言模型逐步融合，未来的智能推理系统将同时处理符号结构、向量检索、长上下文注意力和工具调用等多种计算形态。如何在这些异构计算之间感知结构并协同优化，是后续研究的重要方向。
+ 
+--- a/Chapter/Chapter_cnabstract.tex
++++ b/Chapter/Chapter_cnabstract.tex
+@@ -1,7 +1,7 @@
+ \begin{cnabstract}
+     人工智能技术不断拓展至复杂推理和内容生成等任务。本文所称的“推理”包括关联分析、组合逻辑计算和视觉内容生成等计算过程。相关任务面临数据规模扩大、计算逻辑复杂和算力受限等挑战。数据和模型中的结构信息可以用于判断哪些计算需要执行、哪些计算能够复用，以及不同计算需要分配多少资源。因此，分析任务中的结构规律，并据此优化执行策略，是提升推理效率的重要途径。
+ 
+-    从结构感知优化的角度出发，本文在推理范围、推理编排和资源分配三个层面开展研究，动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频扩散 Transformer（Diffusion Transformer，DiT）稀疏注意力推理是这三个层面的代表性任务。本文就此三个任务分别讨论如何缩减计算范围、组织计算顺序，以及按需分配计算资源。
++    从结构感知优化的角度出发，本文在推理范围、推理编排和资源分配三个层面开展研究，动态图最短路径索引维护、知识图谱复杂逻辑查询训练和视频扩散 Transformer（Diffusion Transformer，DiT）稀疏注意力推理是这三个层面的代表性任务。本文就此三个任务分别讨论如何缩减计算范围、组织计算顺序，以及按需分配计算资源，并进一步研究统一的形式化框架和原型验证。
+ 
+     （1）在推理范围层面，本文研究动态图最短路径索引维护问题。前置方法通过预计算顶点间的距离等信息，构建最短路径索引，以加速最短路径查询。在动态图中，边的插入或删除可能改变顶点间的最短路径关系，因此需要维护索引，使其与最新的图保持一致。针对这一问题，本文提出全批量维护（Fully Batch Maintenance，FulBM）方法，维护基于地标的三跳覆盖标签索引。该方法所关注的拓扑结构，是边更新后最短路径或标签发生变化的顶点及相关边构成的子图。该子图的范围取决于边更新的影响：边插入可能缩短最短距离，边删除则可能使原有最短路径失效，两类更新的传播与修复方式不同。FulBM 据此分别设计批量插入和批量删除维护算法，减少了多余顶点访问和重复传播，并保持维护索引与更新后图上的重建索引严格一致。
+ 
+@@ -9,7 +9,9 @@
+ 
+     （3）在资源分配层面，本文研究视频 DiT 稀疏注意力推理问题，提出免训练的精确预算分配稀疏注意力（Precision-Allocated Sparse Attention，PASA）机制。该任务的时序结构体现为相邻去噪步速度场预测值的变化。不同去噪阶段的变化程度不同，对精确注意力计算的需求也存在差异。以 PISA 为代表的固定稀疏度方法在稀疏区间内为各去噪步分配一致的稀疏度，难以适应这种阶段差异。PASA 利用相邻速度场预测值的 $L_1$ 距离设置逐去噪步稀疏度，为差异较大的去噪步分配更多精确注意力块，并结合块选择与未选块近似维持输出保真度。实验表明，该方法能够在相同精确计算预算下改善输出保真度，并在输出保真度与 PISA 相近时提高平均稀疏度、降低生成延迟。
+ 
+-    综上，三项工作分别利用拓扑、逻辑和时序结构，优化推理范围、推理编排和资源分配。实验结果表明，FulBM 在大规模图混合更新实验中相对 BatchHL 的加速比约为 5.6～228.6 倍，FlashEKGR 在多跳复杂逻辑查询训练中相对 SMORE 的最高加速比达到 5.67 倍；与全量注意力相比，PASA 在三个视频生成模型上的端到端推理加速比平均达到 2.02 倍。
++    （4）在统一抽象与验证层面，本文建立结构感知高效推理的形式化框架，将拓扑、逻辑和时序依赖表示为推理依赖图，以计算范围、节点分组和计算预算描述执行方案及其代价，并实现公共规划与多领域适配的工程原型。通过三类构造任务和增量查询组合实验，验证执行结果及范围收缩与节点合并的组合收益，分析结构差异、任务约束和规划开销对效率的影响。
++
++    综上，前三项研究分别利用拓扑、逻辑和时序结构，优化推理范围、推理编排和资源分配。实验结果表明，FulBM 在大规模图混合更新实验中相对 BatchHL 的加速比约为 5.6～228.6 倍，FlashEKGR 在多跳复杂逻辑查询训练中相对 SMORE 的最高加速比达到 5.67 倍；与全量注意力相比，PASA 在三个视频生成模型上的端到端推理加速比平均达到 2.02 倍。第四项研究进一步以形式化框架和原型验证增强了三类结构感知机制之间的联系。
+ 
+     \cnkeywords{推理；结构感知；动态图；知识图谱；稀疏注意力}
+ \end{cnabstract}
+--- a/Chapter/Chapter_enabstract.tex
++++ b/Chapter/Chapter_enabstract.tex
+@@ -1,7 +1,7 @@
+ \begin{enabstract}
+     Artificial intelligence is increasingly applied to complex reasoning and content generation. In this dissertation, reasoning encompasses computational processes such as association analysis, compositional logic computation, and visual content generation. These tasks face challenges from growing data volumes, complex computational logic, and limited computing resources. Structural information in data and models can help determine which computations need to be performed, which results can be reused, and how many resources should be allocated to different computations. Analyzing structural regularities within tasks and using them to optimize execution strategies is therefore an important approach to improving reasoning efficiency.
+ 
+-    From the perspective of structure-aware optimization, this dissertation studies three levels: computation range, reasoning orchestration, and resource allocation. Dynamic shortest-path index maintenance, training for complex logical queries over knowledge graphs, and sparse attention inference for video Diffusion Transformers (DiTs) are selected as representative tasks at these levels. The three studies respectively examine how to reduce computation range, organize computation execution, and allocate computing resources according to demand.
++    From the perspective of structure-aware optimization, this dissertation studies three levels: computation range, reasoning orchestration, and resource allocation. Dynamic shortest-path index maintenance, training for complex logical queries over knowledge graphs, and sparse attention inference for video Diffusion Transformers (DiTs) are selected as representative tasks at these levels. The first three studies respectively examine how to reduce computation range, organize computation execution, and allocate computing resources according to demand. A fourth study develops a unified formal framework and validates it through an engineering prototype.
+ 
+     (1) At the computation-range level, this dissertation studies dynamic shortest-path index maintenance. Existing methods precompute information such as distances between vertices to build indexes that accelerate shortest-path queries. In dynamic graphs, edge insertions and deletions may change shortest-path relationships between vertices, requiring indexes to be maintained so that they remain consistent with the updated graph. To address this problem, this dissertation proposes Fully Batch Maintenance (FulBM) for a landmark-based three-hop cover labeling index. The topological structure considered by FulBM is the subgraph formed by vertices whose shortest paths or labels change after edge updates and the associated edges. The extent of this subgraph depends on the effects of edge updates: insertions may shorten distances, whereas deletions may invalidate existing shortest paths, requiring different propagation and repair procedures. Accordingly, FulBM uses separate batch insertion and deletion maintenance algorithms to reduce unnecessary vertex accesses and repeated propagation while keeping the maintained index identical to the index rebuilt on the updated graph.
+ 
+@@ -9,7 +9,9 @@
+ 
+     (3) At the resource-allocation level, this dissertation studies sparse attention inference for video DiTs and proposes Precision-Allocated Sparse Attention (PASA), a training-free mechanism. The temporal structure of this task is reflected in changes between velocity-field predictions at adjacent denoising steps. The magnitude of these changes varies across denoising stages, as does the demand for exact attention computation. Fixed-sparsity methods such as PISA assign the same sparsity ratio to each denoising step within the sparse interval, making it difficult to accommodate these stage-dependent differences. PASA uses the $L_1$ distance between adjacent velocity-field predictions to set per-step sparsity ratios, allocating more exact attention blocks to steps with larger differences. It combines block selection with approximation of unselected blocks to maintain output fidelity. Experiments show that PASA improves output fidelity under the same exact-computation budget and enables higher average sparsity and lower generation latency at output fidelity comparable to PISA.
+ 
+-    In summary, the three studies exploit topological, logical, and temporal structures to optimize computation range, reasoning orchestration, and resource allocation, respectively. Experimental results show that FulBM achieves speedups of approximately 5.6--228.6$\times$ over BatchHL for mixed batch updates on large-scale graphs, FlashEKGR achieves a speedup of up to 5.67$\times$ over SMORE for multi-hop complex logical-query training, and PASA achieves an average end-to-end inference speedup of 2.02$\times$ over full attention on three video generation models.
++    (4) At the level of unified abstraction and validation, this dissertation develops a formal framework for structure-aware efficient reasoning. It represents topological, logical, and temporal dependencies as computation dependency graphs, and describes execution plans and their costs through computation scope, node grouping, and computation budgets. An engineering prototype implements shared planning and domain adapters. Simulations on three constructed tasks and incremental-query experiments verify execution results and the composition of scope reduction with node merging, and analyze how structural differences, task constraints, and planning overhead affect efficiency.
++
++    In summary, the first three studies exploit topological, logical, and temporal structures to optimize computation range, reasoning orchestration, and resource allocation, respectively. Experimental results show that FulBM achieves speedups of approximately 5.6--228.6$\times$ over BatchHL for mixed batch updates on large-scale graphs, FlashEKGR achieves a speedup of up to 5.67$\times$ over SMORE for multi-hop complex logical-query training, and PASA achieves an average end-to-end inference speedup of 2.02$\times$ over full attention on three video generation models. The fourth study strengthens the connection among these mechanisms through formal modeling and prototype validation.
+ 
+     \enkeywords{Reasoning; Structure awareness; Dynamic graphs; Knowledge graphs; Sparse attention}
+ \end{enabstract}
+--- a/resources/figures/thesis_organization.tex
++++ b/resources/figures/thesis_organization.tex
+@@ -80,20 +80,22 @@
+     branch/.style={draw=ThesisNeutral, line width=0.75pt}
+ ]
+ 
+-\path[use as bounding box] (-8.05,0.55) rectangle (6.15,-9.25);
++\path[use as bounding box] (-8.05,0.55) rectangle (6.15,-11.15);
+ 
+ \node[chapterRoot] (c1) at (1.85,0) {\textbf{第一章：绪论}\\研究背景、关键科学问题\\与研究内容};
+ \node[chapterReview] (c2) at (1.85,-1.65) {\textbf{第二章：}\\相关工作研究综述\\三类结构感知加速相关研究};
+ \node[chapterTop] (c3) at (1.85,-3.35) {\textbf{第三章：}\\拓扑结构感知的动态图\\最短路径高效推理};
+ \node[chapterMid] (c4) at (1.85,-5.15) {\textbf{第四章：}\\逻辑结构感知的知识图谱\\复杂逻辑高效推理};
+ \node[chapterBot] (c5) at (1.85,-6.95) {\textbf{第五章：}\\时序结构感知的视频 DiT\\稀疏注意力高效推理};
+-\node[chapterRoot] (c6) at (1.85,-8.65) {\textbf{第六章：总结与展望}\\结构感知高效推理方法论\\与未来方向};
++\node[chapterRoot] (c6) at (1.85,-8.65) {\textbf{第六章：}\\结构感知高效推理的\\形式化框架和原型验证};
++\node[chapterRoot] (c7) at (1.85,-10.55) {\textbf{第七章：总结与展望}\\研究总结、应用价值\\与未来方向};
+ 
+ \draw[flow] (c1.south) -- (c2.north);
+ \draw[flow] (c2.south) -- (c3.north);
+ \draw[flow] (c3.south) -- node[right=2pt,font=\tiny,text=ThesisNeutral,fill=white,inner sep=1pt] {优化维度推进} (c4.north);
+ \draw[flow] (c4.south) -- node[right=2pt,font=\tiny,text=ThesisNeutral,fill=white,inner sep=1pt] {优化维度推进} (c5.north);
+ \draw[flow] (c5.south) -- (c6.north);
++\draw[flow] (c6.south) -- (c7.north);
+ 
+ \node[font=\scriptsize\bfseries,text=ThesisNeutral] at (-3.65,-0.92) {共同研究路径};
+ \node[stage] (s1) at (-5.60,-1.55) {分析结构};
+@@ -108,6 +110,9 @@
+ \node[noteTop] (l1) at (-2.2,-3.35) {\textbf{范围收缩}\\定位计算范围};
+ \node[noteMid] (l2) at (-2.2,-5.15) {\textbf{路径合并}\\组织同质计算};
+ \node[noteBot] (l3) at (-2.2,-6.95) {\textbf{预算分配}\\配置计算资源};
++
++\node[chapterReview,text width=5.8cm] (unified) at (-3.65,-8.65) {\textbf{统一抽象与验证}\\依赖图、计算代价与执行变换\\公共规划、多领域适配与组合验证};
++\draw[flow] (unified.east) -- (c6.west);
+ 
+ \coordinate (forkTop) at (-7.05,-2.35);
+ \coordinate (forkBot) at (-7.05,-6.95);

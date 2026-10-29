@@ -1,0 +1,19 @@
+% Generated from audited results/full records; no experiments are rerun.
+\begin{table}[htbp]
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{4pt}
+    \renewcommand\arraystretch{1.2}
+    \caption{不同去噪阶段条件下的预算与留出输入验证结果}
+    \label{tab:prototype_video_budget}
+    \begin{tabular}{p{2.1cm}cccccc}
+        \toprule
+        情形 & 完整预算 & 固定预算 & 阶段预算 & 代价下降 & 加速比 & 最大 RMSE \\
+        \midrule
+        异质阶段 & 192 & 168 & 76 & 32.4\% & $1.05\pm0.04$ & \num{0.002467} \\
+        较长序列 & 640 & 520 & 238 & 39.3\% & $1.23\pm0.03$ & \num{0.002962} \\
+        同质阶段 & 192 & 156 & 151 & 11.5\% & $1.00\pm0.01$ & \num{0.002417} \\
+        严格误差要求 & 192 & 192 & 192 & 0.0\% & $0.98\pm0.05$ & \num{0} \\
+        \bottomrule
+    \end{tabular}
+\end{table}

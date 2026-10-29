@@ -38,6 +38,7 @@ python3 -m structure_aware.audit results/my_full_run
 |`tests/`|独立最短路核验、数值梯度检查、缓存失效、变换组合、预算约束及回退测试|
 |`examples/`|四个小规模任务的完整依赖图、候选方案、实际节点范围和合并分组，可直接查看JSON|
 |`tools/export_plans.py`|重新导出上述可检查的执行方案|
+|`tools/export_chapter_tables.py`|从已审计记录导出第六章的结构条件、阶段预算和组合耗时表|
 |`docs/design.md`|接口、算法、约束、代价口径和实验设计|
 |`results/full/`|当前代码的完整实验记录及报告|
 |`results/pilot_full/`|优化公共规划器前的诊断实验及对应源文件快照|
@@ -65,6 +66,6 @@ python3 -m structure_aware.audit results/my_full_run
 python3 -m structure_aware.audit results/pilot_full --archived
 ```
 
-完整设计见`docs/design.md`。本次论文补充的修改说明及可应用的源文件差异分别保存于`docs/论文修改说明.md`与`docs/thesis-integration.patch`；结果表由论文绪论直接引用，避免手工抄录实验数值。
+完整设计见`docs/design.md`。论文第六章“结构感知高效推理的形式化框架和原型验证”集中介绍形式化框架、原型设计与实验；绪论设置对应的研究内容四，总结位于第七章。修改说明及本次章节重组的源文件差异分别保存于`docs/论文修改说明.md`与`docs/thesis-integration.patch`；结果表由第六章直接引用，避免手工抄录实验数值。
 
 论文结果表`thesis_results.tex`由原始记录自动生成，禁止手动修改数值。输入文件摘要、配置摘要、代码摘要及每次运行的状态保存在对应输出目录中。
