@@ -1,0 +1,42 @@
+{
+  "domain": "image_pipeline",
+  "case": {
+    "name": "partial_update",
+    "duplicate": true,
+    "changed": 0.1,
+    "warm_cache": true
+  },
+  "seed": 43,
+  "base_input_file": "inputs/image_pipeline_43_1.npz",
+  "base_input_sha256": "3faea17b1da7d5a505e620b2d17cddbed540b258addfb9b0a8d00011d35a4da8",
+  "current_input_digest": "2ad47142b7c3f992535179d1542ad73233c3f72ed1ac4356dcdd2689be8c981a",
+  "reference_output_digest": "6b695443bc698f40ad2b32fbefb6258c02ef372fef88878f7304ad1017871757",
+  "initial_cache_timing": {
+    "prepare": 0.0018990839598700404,
+    "planning": 1.5916069969534874e-05,
+    "execution": 0.0072633749805390835,
+    "online": 0.009178375010378659,
+    "validation": 4.202593117952347e-08
+  },
+  "formulas": null,
+  "outputs": [
+    "image_0/edges",
+    "image_0/mask",
+    "image_0/preview",
+    "image_1/edges",
+    "image_1/mask",
+    "image_1/preview",
+    "image_2/edges",
+    "image_2/mask",
+    "image_2/preview",
+    "image_3/edges",
+    "image_3/mask",
+    "image_3/preview",
+    "image_4/edges",
+    "image_4/mask",
+    "image_4/preview",
+    "image_5/edges",
+    "image_5/mask",
+    "image_5/preview"
+  ]
+}

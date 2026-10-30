@@ -1,0 +1,1494 @@
+{
+  "task": "spreadsheet",
+  "planner": "Planner",
+  "executor": "_GraphBackend",
+  "adapter_implements_execution": false,
+  "inputs": {
+    "Revenue_0": {
+      "shape": [
+        1024
+      ],
+      "dtype": "float64"
+    },
+    "Expense_0": {
+      "shape": [
+        1024
+      ],
+      "dtype": "float64"
+    },
+    "Revenue_1": {
+      "shape": [
+        1024
+      ],
+      "dtype": "float64"
+    },
+    "Expense_1": {
+      "shape": [
+        1024
+      ],
+      "dtype": "float64"
+    },
+    "Revenue_2": {
+      "shape": [
+        1024
+      ],
+      "dtype": "float64"
+    },
+    "Expense_2": {
+      "shape": [
+        1024
+      ],
+      "dtype": "float64"
+    }
+  },
+  "outputs": [
+    "Report_0_0",
+    "Report_0_1",
+    "Report_0_2",
+    "Report_1_0",
+    "Report_1_1",
+    "Report_1_2",
+    "Report_2_0",
+    "Report_2_1",
+    "Report_2_2"
+  ],
+  "nodes": [
+    {
+      "name": "Report_0_0::expression:5",
+      "operation": "subtract",
+      "dependencies": [
+        "Revenue_0",
+        "Expense_0"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_0_0::expression:6",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 0.9
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_0_0::expression:4",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_0_0::expression:5",
+        "Report_0_0::expression:6"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_0_0::expression:3",
+      "operation": "sum",
+      "dependencies": [
+        "Report_0_0::expression:4"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_0_0::expression:7",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 1
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_0_0::expression:2",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_0_0::expression:3",
+        "Report_0_0::expression:7"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_0_0::expression:8",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 100.0
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_0_0::expression:1",
+      "operation": "divide",
+      "dependencies": [
+        "Report_0_0::expression:2",
+        "Report_0_0::expression:8"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_0_0",
+      "operation": "identity",
+      "dependencies": [
+        "Report_0_0::expression:1"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_0_1::expression:5",
+      "operation": "subtract",
+      "dependencies": [
+        "Revenue_0",
+        "Expense_0"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_0_1::expression:6",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 0.9
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_0_1::expression:4",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_0_1::expression:5",
+        "Report_0_1::expression:6"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_0_1::expression:3",
+      "operation": "sum",
+      "dependencies": [
+        "Report_0_1::expression:4"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_0_1::expression:7",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 2
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_0_1::expression:2",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_0_1::expression:3",
+        "Report_0_1::expression:7"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_0_1::expression:8",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 100.0
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_0_1::expression:1",
+      "operation": "divide",
+      "dependencies": [
+        "Report_0_1::expression:2",
+        "Report_0_1::expression:8"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_0_1",
+      "operation": "identity",
+      "dependencies": [
+        "Report_0_1::expression:1"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_0_2::expression:5",
+      "operation": "subtract",
+      "dependencies": [
+        "Revenue_0",
+        "Expense_0"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_0_2::expression:6",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 0.9
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_0_2::expression:4",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_0_2::expression:5",
+        "Report_0_2::expression:6"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_0_2::expression:3",
+      "operation": "sum",
+      "dependencies": [
+        "Report_0_2::expression:4"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_0_2::expression:7",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 3
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_0_2::expression:2",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_0_2::expression:3",
+        "Report_0_2::expression:7"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_0_2::expression:8",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 100.0
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_0_2::expression:1",
+      "operation": "divide",
+      "dependencies": [
+        "Report_0_2::expression:2",
+        "Report_0_2::expression:8"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_0_2",
+      "operation": "identity",
+      "dependencies": [
+        "Report_0_2::expression:1"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_1_0::expression:5",
+      "operation": "subtract",
+      "dependencies": [
+        "Revenue_1",
+        "Expense_1"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_1_0::expression:6",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 0.9
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_1_0::expression:4",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_1_0::expression:5",
+        "Report_1_0::expression:6"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_1_0::expression:3",
+      "operation": "sum",
+      "dependencies": [
+        "Report_1_0::expression:4"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_1_0::expression:7",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 1
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_1_0::expression:2",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_1_0::expression:3",
+        "Report_1_0::expression:7"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_1_0::expression:8",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 100.0
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_1_0::expression:1",
+      "operation": "divide",
+      "dependencies": [
+        "Report_1_0::expression:2",
+        "Report_1_0::expression:8"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_1_0",
+      "operation": "identity",
+      "dependencies": [
+        "Report_1_0::expression:1"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_1_1::expression:5",
+      "operation": "subtract",
+      "dependencies": [
+        "Revenue_1",
+        "Expense_1"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_1_1::expression:6",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 0.9
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_1_1::expression:4",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_1_1::expression:5",
+        "Report_1_1::expression:6"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_1_1::expression:3",
+      "operation": "sum",
+      "dependencies": [
+        "Report_1_1::expression:4"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_1_1::expression:7",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 2
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_1_1::expression:2",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_1_1::expression:3",
+        "Report_1_1::expression:7"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_1_1::expression:8",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 100.0
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_1_1::expression:1",
+      "operation": "divide",
+      "dependencies": [
+        "Report_1_1::expression:2",
+        "Report_1_1::expression:8"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_1_1",
+      "operation": "identity",
+      "dependencies": [
+        "Report_1_1::expression:1"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_1_2::expression:5",
+      "operation": "subtract",
+      "dependencies": [
+        "Revenue_1",
+        "Expense_1"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_1_2::expression:6",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 0.9
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_1_2::expression:4",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_1_2::expression:5",
+        "Report_1_2::expression:6"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_1_2::expression:3",
+      "operation": "sum",
+      "dependencies": [
+        "Report_1_2::expression:4"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_1_2::expression:7",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 3
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_1_2::expression:2",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_1_2::expression:3",
+        "Report_1_2::expression:7"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_1_2::expression:8",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 100.0
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_1_2::expression:1",
+      "operation": "divide",
+      "dependencies": [
+        "Report_1_2::expression:2",
+        "Report_1_2::expression:8"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_1_2",
+      "operation": "identity",
+      "dependencies": [
+        "Report_1_2::expression:1"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_2_0::expression:5",
+      "operation": "subtract",
+      "dependencies": [
+        "Revenue_2",
+        "Expense_2"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_2_0::expression:6",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 0.9
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_2_0::expression:4",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_2_0::expression:5",
+        "Report_2_0::expression:6"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_2_0::expression:3",
+      "operation": "sum",
+      "dependencies": [
+        "Report_2_0::expression:4"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_2_0::expression:7",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 1
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_2_0::expression:2",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_2_0::expression:3",
+        "Report_2_0::expression:7"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_2_0::expression:8",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 100.0
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_2_0::expression:1",
+      "operation": "divide",
+      "dependencies": [
+        "Report_2_0::expression:2",
+        "Report_2_0::expression:8"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_2_0",
+      "operation": "identity",
+      "dependencies": [
+        "Report_2_0::expression:1"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_2_1::expression:5",
+      "operation": "subtract",
+      "dependencies": [
+        "Revenue_2",
+        "Expense_2"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_2_1::expression:6",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 0.9
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_2_1::expression:4",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_2_1::expression:5",
+        "Report_2_1::expression:6"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_2_1::expression:3",
+      "operation": "sum",
+      "dependencies": [
+        "Report_2_1::expression:4"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_2_1::expression:7",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 2
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_2_1::expression:2",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_2_1::expression:3",
+        "Report_2_1::expression:7"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_2_1::expression:8",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 100.0
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_2_1::expression:1",
+      "operation": "divide",
+      "dependencies": [
+        "Report_2_1::expression:2",
+        "Report_2_1::expression:8"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_2_1",
+      "operation": "identity",
+      "dependencies": [
+        "Report_2_1::expression:1"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_2_2::expression:5",
+      "operation": "subtract",
+      "dependencies": [
+        "Revenue_2",
+        "Expense_2"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_2_2::expression:6",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 0.9
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_2_2::expression:4",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_2_2::expression:5",
+        "Report_2_2::expression:6"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_2_2::expression:3",
+      "operation": "sum",
+      "dependencies": [
+        "Report_2_2::expression:4"
+      ],
+      "parameters": {},
+      "work": 1024
+    },
+    {
+      "name": "Report_2_2::expression:7",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 3
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_2_2::expression:2",
+      "operation": "multiply",
+      "dependencies": [
+        "Report_2_2::expression:3",
+        "Report_2_2::expression:7"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_2_2::expression:8",
+      "operation": "constant",
+      "dependencies": [],
+      "parameters": {
+        "value": 100.0
+      },
+      "work": 1
+    },
+    {
+      "name": "Report_2_2::expression:1",
+      "operation": "divide",
+      "dependencies": [
+        "Report_2_2::expression:2",
+        "Report_2_2::expression:8"
+      ],
+      "parameters": {},
+      "work": 1
+    },
+    {
+      "name": "Report_2_2",
+      "operation": "identity",
+      "dependencies": [
+        "Report_2_2::expression:1"
+      ],
+      "parameters": {},
+      "work": 1
+    }
+  ],
+  "required": [
+    "Revenue_0",
+    "Report_0_0::expression:5",
+    "Report_0_1::expression:5",
+    "Report_0_2::expression:5",
+    "Report_0_0::expression:4",
+    "Report_0_1::expression:4",
+    "Report_0_2::expression:4",
+    "Report_0_0::expression:3",
+    "Report_0_1::expression:3",
+    "Report_0_2::expression:3",
+    "Report_0_0::expression:2",
+    "Report_0_1::expression:2",
+    "Report_0_2::expression:2",
+    "Report_0_0::expression:1",
+    "Report_0_1::expression:1",
+    "Report_0_2::expression:1",
+    "Report_0_0",
+    "Report_0_1",
+    "Report_0_2"
+  ],
+  "plans": [
+    {
+      "mode": "reference",
+      "chosen_plan": "reference",
+      "kernel_calls": 81,
+      "active_units": 87,
+      "execution_groups": 87,
+      "estimated_work": 27708.0,
+      "passed": true,
+      "output_digest": "2ec92c91cba5205a5120ceb3218e4f7399d2aeffc4d4dd6186ed8def365bb253",
+      "groups": [
+        [
+          "Revenue_0"
+        ],
+        [
+          "Expense_0"
+        ],
+        [
+          "Revenue_1"
+        ],
+        [
+          "Expense_1"
+        ],
+        [
+          "Revenue_2"
+        ],
+        [
+          "Expense_2"
+        ],
+        [
+          "Report_0_0::expression:6"
+        ],
+        [
+          "Report_0_0::expression:7"
+        ],
+        [
+          "Report_0_0::expression:8"
+        ],
+        [
+          "Report_0_1::expression:6"
+        ],
+        [
+          "Report_0_1::expression:7"
+        ],
+        [
+          "Report_0_1::expression:8"
+        ],
+        [
+          "Report_0_2::expression:6"
+        ],
+        [
+          "Report_0_2::expression:7"
+        ],
+        [
+          "Report_0_2::expression:8"
+        ],
+        [
+          "Report_1_0::expression:6"
+        ],
+        [
+          "Report_1_0::expression:7"
+        ],
+        [
+          "Report_1_0::expression:8"
+        ],
+        [
+          "Report_1_1::expression:6"
+        ],
+        [
+          "Report_1_1::expression:7"
+        ],
+        [
+          "Report_1_1::expression:8"
+        ],
+        [
+          "Report_1_2::expression:6"
+        ],
+        [
+          "Report_1_2::expression:7"
+        ],
+        [
+          "Report_1_2::expression:8"
+        ],
+        [
+          "Report_2_0::expression:6"
+        ],
+        [
+          "Report_2_0::expression:7"
+        ],
+        [
+          "Report_2_0::expression:8"
+        ],
+        [
+          "Report_2_1::expression:6"
+        ],
+        [
+          "Report_2_1::expression:7"
+        ],
+        [
+          "Report_2_1::expression:8"
+        ],
+        [
+          "Report_2_2::expression:6"
+        ],
+        [
+          "Report_2_2::expression:7"
+        ],
+        [
+          "Report_2_2::expression:8"
+        ],
+        [
+          "Report_0_0::expression:5"
+        ],
+        [
+          "Report_0_1::expression:5"
+        ],
+        [
+          "Report_0_2::expression:5"
+        ],
+        [
+          "Report_1_0::expression:5"
+        ],
+        [
+          "Report_1_1::expression:5"
+        ],
+        [
+          "Report_1_2::expression:5"
+        ],
+        [
+          "Report_2_0::expression:5"
+        ],
+        [
+          "Report_2_1::expression:5"
+        ],
+        [
+          "Report_2_2::expression:5"
+        ],
+        [
+          "Report_0_0::expression:4"
+        ],
+        [
+          "Report_0_1::expression:4"
+        ],
+        [
+          "Report_0_2::expression:4"
+        ],
+        [
+          "Report_1_0::expression:4"
+        ],
+        [
+          "Report_1_1::expression:4"
+        ],
+        [
+          "Report_1_2::expression:4"
+        ],
+        [
+          "Report_2_0::expression:4"
+        ],
+        [
+          "Report_2_1::expression:4"
+        ],
+        [
+          "Report_2_2::expression:4"
+        ],
+        [
+          "Report_0_0::expression:3"
+        ],
+        [
+          "Report_0_1::expression:3"
+        ],
+        [
+          "Report_0_2::expression:3"
+        ],
+        [
+          "Report_1_0::expression:3"
+        ],
+        [
+          "Report_1_1::expression:3"
+        ],
+        [
+          "Report_1_2::expression:3"
+        ],
+        [
+          "Report_2_0::expression:3"
+        ],
+        [
+          "Report_2_1::expression:3"
+        ],
+        [
+          "Report_2_2::expression:3"
+        ],
+        [
+          "Report_0_0::expression:2"
+        ],
+        [
+          "Report_0_1::expression:2"
+        ],
+        [
+          "Report_0_2::expression:2"
+        ],
+        [
+          "Report_1_0::expression:2"
+        ],
+        [
+          "Report_1_1::expression:2"
+        ],
+        [
+          "Report_1_2::expression:2"
+        ],
+        [
+          "Report_2_0::expression:2"
+        ],
+        [
+          "Report_2_1::expression:2"
+        ],
+        [
+          "Report_2_2::expression:2"
+        ],
+        [
+          "Report_0_0::expression:1"
+        ],
+        [
+          "Report_0_1::expression:1"
+        ],
+        [
+          "Report_0_2::expression:1"
+        ],
+        [
+          "Report_1_0::expression:1"
+        ],
+        [
+          "Report_1_1::expression:1"
+        ],
+        [
+          "Report_1_2::expression:1"
+        ],
+        [
+          "Report_2_0::expression:1"
+        ],
+        [
+          "Report_2_1::expression:1"
+        ],
+        [
+          "Report_2_2::expression:1"
+        ],
+        [
+          "Report_0_0"
+        ],
+        [
+          "Report_0_1"
+        ],
+        [
+          "Report_0_2"
+        ],
+        [
+          "Report_1_0"
+        ],
+        [
+          "Report_1_1"
+        ],
+        [
+          "Report_1_2"
+        ],
+        [
+          "Report_2_0"
+        ],
+        [
+          "Report_2_1"
+        ],
+        [
+          "Report_2_2"
+        ]
+      ]
+    },
+    {
+      "mode": "scope",
+      "chosen_plan": "scope",
+      "kernel_calls": 18,
+      "active_units": 19,
+      "execution_groups": 19,
+      "estimated_work": 9332.0,
+      "passed": true,
+      "output_digest": "2ec92c91cba5205a5120ceb3218e4f7399d2aeffc4d4dd6186ed8def365bb253",
+      "groups": [
+        [
+          "Revenue_0"
+        ],
+        [
+          "Report_0_0::expression:5"
+        ],
+        [
+          "Report_0_1::expression:5"
+        ],
+        [
+          "Report_0_2::expression:5"
+        ],
+        [
+          "Report_0_0::expression:4"
+        ],
+        [
+          "Report_0_1::expression:4"
+        ],
+        [
+          "Report_0_2::expression:4"
+        ],
+        [
+          "Report_0_0::expression:3"
+        ],
+        [
+          "Report_0_1::expression:3"
+        ],
+        [
+          "Report_0_2::expression:3"
+        ],
+        [
+          "Report_0_0::expression:2"
+        ],
+        [
+          "Report_0_1::expression:2"
+        ],
+        [
+          "Report_0_2::expression:2"
+        ],
+        [
+          "Report_0_0::expression:1"
+        ],
+        [
+          "Report_0_1::expression:1"
+        ],
+        [
+          "Report_0_2::expression:1"
+        ],
+        [
+          "Report_0_0"
+        ],
+        [
+          "Report_0_1"
+        ],
+        [
+          "Report_0_2"
+        ]
+      ]
+    },
+    {
+      "mode": "merge",
+      "chosen_plan": "merge",
+      "kernel_calls": 41,
+      "active_units": 87,
+      "execution_groups": 47,
+      "estimated_work": 9518.0,
+      "passed": true,
+      "output_digest": "2ec92c91cba5205a5120ceb3218e4f7399d2aeffc4d4dd6186ed8def365bb253",
+      "groups": [
+        [
+          "Revenue_0"
+        ],
+        [
+          "Expense_0"
+        ],
+        [
+          "Revenue_1"
+        ],
+        [
+          "Expense_1"
+        ],
+        [
+          "Revenue_2"
+        ],
+        [
+          "Expense_2"
+        ],
+        [
+          "Report_0_0::expression:6",
+          "Report_0_1::expression:6",
+          "Report_0_2::expression:6",
+          "Report_1_0::expression:6",
+          "Report_1_1::expression:6",
+          "Report_1_2::expression:6",
+          "Report_2_0::expression:6",
+          "Report_2_1::expression:6",
+          "Report_2_2::expression:6"
+        ],
+        [
+          "Report_0_0::expression:7",
+          "Report_1_0::expression:7",
+          "Report_2_0::expression:7"
+        ],
+        [
+          "Report_0_0::expression:8",
+          "Report_0_1::expression:8",
+          "Report_0_2::expression:8",
+          "Report_1_0::expression:8",
+          "Report_1_1::expression:8",
+          "Report_1_2::expression:8",
+          "Report_2_0::expression:8",
+          "Report_2_1::expression:8",
+          "Report_2_2::expression:8"
+        ],
+        [
+          "Report_0_1::expression:7",
+          "Report_1_1::expression:7",
+          "Report_2_1::expression:7"
+        ],
+        [
+          "Report_0_2::expression:7",
+          "Report_1_2::expression:7",
+          "Report_2_2::expression:7"
+        ],
+        [
+          "Report_0_0::expression:5",
+          "Report_0_1::expression:5",
+          "Report_0_2::expression:5"
+        ],
+        [
+          "Report_1_0::expression:5",
+          "Report_1_1::expression:5",
+          "Report_1_2::expression:5"
+        ],
+        [
+          "Report_2_0::expression:5",
+          "Report_2_1::expression:5",
+          "Report_2_2::expression:5"
+        ],
+        [
+          "Report_0_0::expression:4",
+          "Report_0_1::expression:4",
+          "Report_0_2::expression:4"
+        ],
+        [
+          "Report_1_0::expression:4",
+          "Report_1_1::expression:4",
+          "Report_1_2::expression:4"
+        ],
+        [
+          "Report_2_0::expression:4",
+          "Report_2_1::expression:4",
+          "Report_2_2::expression:4"
+        ],
+        [
+          "Report_0_0::expression:3",
+          "Report_0_1::expression:3",
+          "Report_0_2::expression:3"
+        ],
+        [
+          "Report_1_0::expression:3",
+          "Report_1_1::expression:3",
+          "Report_1_2::expression:3"
+        ],
+        [
+          "Report_2_0::expression:3",
+          "Report_2_1::expression:3",
+          "Report_2_2::expression:3"
+        ],
+        [
+          "Report_0_0::expression:2"
+        ],
+        [
+          "Report_0_1::expression:2"
+        ],
+        [
+          "Report_0_2::expression:2"
+        ],
+        [
+          "Report_1_0::expression:2"
+        ],
+        [
+          "Report_1_1::expression:2"
+        ],
+        [
+          "Report_1_2::expression:2"
+        ],
+        [
+          "Report_2_0::expression:2"
+        ],
+        [
+          "Report_2_1::expression:2"
+        ],
+        [
+          "Report_2_2::expression:2"
+        ],
+        [
+          "Report_0_0::expression:1"
+        ],
+        [
+          "Report_0_1::expression:1"
+        ],
+        [
+          "Report_0_2::expression:1"
+        ],
+        [
+          "Report_1_0::expression:1"
+        ],
+        [
+          "Report_1_1::expression:1"
+        ],
+        [
+          "Report_1_2::expression:1"
+        ],
+        [
+          "Report_2_0::expression:1"
+        ],
+        [
+          "Report_2_1::expression:1"
+        ],
+        [
+          "Report_2_2::expression:1"
+        ],
+        [
+          "Report_0_0"
+        ],
+        [
+          "Report_0_1"
+        ],
+        [
+          "Report_0_2"
+        ],
+        [
+          "Report_1_0"
+        ],
+        [
+          "Report_1_1"
+        ],
+        [
+          "Report_1_2"
+        ],
+        [
+          "Report_2_0"
+        ],
+        [
+          "Report_2_1"
+        ],
+        [
+          "Report_2_2"
+        ]
+      ]
+    },
+    {
+      "mode": "combined",
+      "chosen_plan": "scope+merge",
+      "kernel_calls": 12,
+      "active_units": 19,
+      "execution_groups": 13,
+      "estimated_work": 3384.0,
+      "passed": true,
+      "output_digest": "2ec92c91cba5205a5120ceb3218e4f7399d2aeffc4d4dd6186ed8def365bb253",
+      "groups": [
+        [
+          "Revenue_0"
+        ],
+        [
+          "Report_0_0::expression:5",
+          "Report_0_1::expression:5",
+          "Report_0_2::expression:5"
+        ],
+        [
+          "Report_0_0::expression:4",
+          "Report_0_1::expression:4",
+          "Report_0_2::expression:4"
+        ],
+        [
+          "Report_0_0::expression:3",
+          "Report_0_1::expression:3",
+          "Report_0_2::expression:3"
+        ],
+        [
+          "Report_0_0::expression:2"
+        ],
+        [
+          "Report_0_1::expression:2"
+        ],
+        [
+          "Report_0_2::expression:2"
+        ],
+        [
+          "Report_0_0::expression:1"
+        ],
+        [
+          "Report_0_1::expression:1"
+        ],
+        [
+          "Report_0_2::expression:1"
+        ],
+        [
+          "Report_0_0"
+        ],
+        [
+          "Report_0_1"
+        ],
+        [
+          "Report_0_2"
+        ]
+      ]
+    },
+    {
+      "mode": "auto",
+      "chosen_plan": "scope+merge",
+      "kernel_calls": 12,
+      "active_units": 19,
+      "execution_groups": 13,
+      "estimated_work": 3384.0,
+      "passed": true,
+      "output_digest": "2ec92c91cba5205a5120ceb3218e4f7399d2aeffc4d4dd6186ed8def365bb253",
+      "groups": [
+        [
+          "Revenue_0"
+        ],
+        [
+          "Report_0_0::expression:5",
+          "Report_0_1::expression:5",
+          "Report_0_2::expression:5"
+        ],
+        [
+          "Report_0_0::expression:4",
+          "Report_0_1::expression:4",
+          "Report_0_2::expression:4"
+        ],
+        [
+          "Report_0_0::expression:3",
+          "Report_0_1::expression:3",
+          "Report_0_2::expression:3"
+        ],
+        [
+          "Report_0_0::expression:2"
+        ],
+        [
+          "Report_0_1::expression:2"
+        ],
+        [
+          "Report_0_2::expression:2"
+        ],
+        [
+          "Report_0_0::expression:1"
+        ],
+        [
+          "Report_0_1::expression:1"
+        ],
+        [
+          "Report_0_2::expression:1"
+        ],
+        [
+          "Report_0_0"
+        ],
+        [
+          "Report_0_1"
+        ],
+        [
+          "Report_0_2"
+        ]
+      ]
+    }
+  ]
+}

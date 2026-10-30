@@ -1,0 +1,622 @@
+{
+  "task": "image_pipeline",
+  "planner": "Planner",
+  "executor": "_GraphBackend",
+  "adapter_implements_execution": false,
+  "inputs": {
+    "image_0": {
+      "shape": [
+        32,
+        32,
+        3
+      ],
+      "dtype": "float64"
+    },
+    "image_1": {
+      "shape": [
+        32,
+        32,
+        3
+      ],
+      "dtype": "float64"
+    },
+    "image_2": {
+      "shape": [
+        32,
+        32,
+        3
+      ],
+      "dtype": "float64"
+    }
+  },
+  "outputs": [
+    "image_0/edges",
+    "image_0/mask",
+    "image_0/preview",
+    "image_1/edges",
+    "image_1/mask",
+    "image_1/preview",
+    "image_2/edges",
+    "image_2/mask",
+    "image_2/preview"
+  ],
+  "nodes": [
+    {
+      "name": "image_0/edges/gray",
+      "operation": "grayscale",
+      "dependencies": [
+        "image_0"
+      ],
+      "parameters": {},
+      "work": 5120
+    },
+    {
+      "name": "image_0/edges/blur",
+      "operation": "gaussian",
+      "dependencies": [
+        "image_0/edges/gray"
+      ],
+      "parameters": {
+        "passes": 2
+      },
+      "work": 40960
+    },
+    {
+      "name": "image_0/edges",
+      "operation": "edges",
+      "dependencies": [
+        "image_0/edges/blur"
+      ],
+      "parameters": {},
+      "work": 24576
+    },
+    {
+      "name": "image_0/mask/gray",
+      "operation": "grayscale",
+      "dependencies": [
+        "image_0"
+      ],
+      "parameters": {},
+      "work": 5120
+    },
+    {
+      "name": "image_0/mask/blur",
+      "operation": "gaussian",
+      "dependencies": [
+        "image_0/mask/gray"
+      ],
+      "parameters": {
+        "passes": 2
+      },
+      "work": 40960
+    },
+    {
+      "name": "image_0/mask",
+      "operation": "mask",
+      "dependencies": [
+        "image_0/mask/blur"
+      ],
+      "parameters": {
+        "level": 0.5
+      },
+      "work": 2048
+    },
+    {
+      "name": "image_0/preview/gray",
+      "operation": "grayscale",
+      "dependencies": [
+        "image_0"
+      ],
+      "parameters": {},
+      "work": 5120
+    },
+    {
+      "name": "image_0/preview/blur",
+      "operation": "gaussian",
+      "dependencies": [
+        "image_0/preview/gray"
+      ],
+      "parameters": {
+        "passes": 2
+      },
+      "work": 40960
+    },
+    {
+      "name": "image_0/preview",
+      "operation": "preview",
+      "dependencies": [
+        "image_0/preview/blur"
+      ],
+      "parameters": {
+        "gain": 1.2
+      },
+      "work": 2048
+    },
+    {
+      "name": "image_1/edges/gray",
+      "operation": "grayscale",
+      "dependencies": [
+        "image_1"
+      ],
+      "parameters": {},
+      "work": 5120
+    },
+    {
+      "name": "image_1/edges/blur",
+      "operation": "gaussian",
+      "dependencies": [
+        "image_1/edges/gray"
+      ],
+      "parameters": {
+        "passes": 2
+      },
+      "work": 40960
+    },
+    {
+      "name": "image_1/edges",
+      "operation": "edges",
+      "dependencies": [
+        "image_1/edges/blur"
+      ],
+      "parameters": {},
+      "work": 24576
+    },
+    {
+      "name": "image_1/mask/gray",
+      "operation": "grayscale",
+      "dependencies": [
+        "image_1"
+      ],
+      "parameters": {},
+      "work": 5120
+    },
+    {
+      "name": "image_1/mask/blur",
+      "operation": "gaussian",
+      "dependencies": [
+        "image_1/mask/gray"
+      ],
+      "parameters": {
+        "passes": 2
+      },
+      "work": 40960
+    },
+    {
+      "name": "image_1/mask",
+      "operation": "mask",
+      "dependencies": [
+        "image_1/mask/blur"
+      ],
+      "parameters": {
+        "level": 0.5
+      },
+      "work": 2048
+    },
+    {
+      "name": "image_1/preview/gray",
+      "operation": "grayscale",
+      "dependencies": [
+        "image_1"
+      ],
+      "parameters": {},
+      "work": 5120
+    },
+    {
+      "name": "image_1/preview/blur",
+      "operation": "gaussian",
+      "dependencies": [
+        "image_1/preview/gray"
+      ],
+      "parameters": {
+        "passes": 2
+      },
+      "work": 40960
+    },
+    {
+      "name": "image_1/preview",
+      "operation": "preview",
+      "dependencies": [
+        "image_1/preview/blur"
+      ],
+      "parameters": {
+        "gain": 1.2
+      },
+      "work": 2048
+    },
+    {
+      "name": "image_2/edges/gray",
+      "operation": "grayscale",
+      "dependencies": [
+        "image_2"
+      ],
+      "parameters": {},
+      "work": 5120
+    },
+    {
+      "name": "image_2/edges/blur",
+      "operation": "gaussian",
+      "dependencies": [
+        "image_2/edges/gray"
+      ],
+      "parameters": {
+        "passes": 2
+      },
+      "work": 40960
+    },
+    {
+      "name": "image_2/edges",
+      "operation": "edges",
+      "dependencies": [
+        "image_2/edges/blur"
+      ],
+      "parameters": {},
+      "work": 24576
+    },
+    {
+      "name": "image_2/mask/gray",
+      "operation": "grayscale",
+      "dependencies": [
+        "image_2"
+      ],
+      "parameters": {},
+      "work": 5120
+    },
+    {
+      "name": "image_2/mask/blur",
+      "operation": "gaussian",
+      "dependencies": [
+        "image_2/mask/gray"
+      ],
+      "parameters": {
+        "passes": 2
+      },
+      "work": 40960
+    },
+    {
+      "name": "image_2/mask",
+      "operation": "mask",
+      "dependencies": [
+        "image_2/mask/blur"
+      ],
+      "parameters": {
+        "level": 0.5
+      },
+      "work": 2048
+    },
+    {
+      "name": "image_2/preview/gray",
+      "operation": "grayscale",
+      "dependencies": [
+        "image_2"
+      ],
+      "parameters": {},
+      "work": 5120
+    },
+    {
+      "name": "image_2/preview/blur",
+      "operation": "gaussian",
+      "dependencies": [
+        "image_2/preview/gray"
+      ],
+      "parameters": {
+        "passes": 2
+      },
+      "work": 40960
+    },
+    {
+      "name": "image_2/preview",
+      "operation": "preview",
+      "dependencies": [
+        "image_2/preview/blur"
+      ],
+      "parameters": {
+        "gain": 1.2
+      },
+      "work": 2048
+    }
+  ],
+  "required": [
+    "image_0",
+    "image_0/edges/gray",
+    "image_0/mask/gray",
+    "image_0/preview/gray",
+    "image_0/edges/blur",
+    "image_0/mask/blur",
+    "image_0/preview/blur",
+    "image_0/edges",
+    "image_0/mask",
+    "image_0/preview"
+  ],
+  "plans": [
+    {
+      "mode": "reference",
+      "chosen_plan": "reference",
+      "kernel_calls": 27,
+      "active_units": 30,
+      "execution_groups": 30,
+      "estimated_work": 500739.0,
+      "passed": true,
+      "output_digest": "e579829c8aff78f22750f10def278131e9170266d143c78a9733b907510cc1af",
+      "groups": [
+        [
+          "image_0"
+        ],
+        [
+          "image_1"
+        ],
+        [
+          "image_2"
+        ],
+        [
+          "image_0/edges/gray"
+        ],
+        [
+          "image_0/mask/gray"
+        ],
+        [
+          "image_0/preview/gray"
+        ],
+        [
+          "image_1/edges/gray"
+        ],
+        [
+          "image_1/mask/gray"
+        ],
+        [
+          "image_1/preview/gray"
+        ],
+        [
+          "image_2/edges/gray"
+        ],
+        [
+          "image_2/mask/gray"
+        ],
+        [
+          "image_2/preview/gray"
+        ],
+        [
+          "image_0/edges/blur"
+        ],
+        [
+          "image_0/mask/blur"
+        ],
+        [
+          "image_0/preview/blur"
+        ],
+        [
+          "image_1/edges/blur"
+        ],
+        [
+          "image_1/mask/blur"
+        ],
+        [
+          "image_1/preview/blur"
+        ],
+        [
+          "image_2/edges/blur"
+        ],
+        [
+          "image_2/mask/blur"
+        ],
+        [
+          "image_2/preview/blur"
+        ],
+        [
+          "image_0/edges"
+        ],
+        [
+          "image_0/mask"
+        ],
+        [
+          "image_0/preview"
+        ],
+        [
+          "image_1/edges"
+        ],
+        [
+          "image_1/mask"
+        ],
+        [
+          "image_1/preview"
+        ],
+        [
+          "image_2/edges"
+        ],
+        [
+          "image_2/mask"
+        ],
+        [
+          "image_2/preview"
+        ]
+      ]
+    },
+    {
+      "mode": "scope",
+      "chosen_plan": "scope",
+      "kernel_calls": 9,
+      "active_units": 10,
+      "execution_groups": 10,
+      "estimated_work": 166953.0,
+      "passed": true,
+      "output_digest": "e579829c8aff78f22750f10def278131e9170266d143c78a9733b907510cc1af",
+      "groups": [
+        [
+          "image_0"
+        ],
+        [
+          "image_0/edges/gray"
+        ],
+        [
+          "image_0/mask/gray"
+        ],
+        [
+          "image_0/preview/gray"
+        ],
+        [
+          "image_0/edges/blur"
+        ],
+        [
+          "image_0/mask/blur"
+        ],
+        [
+          "image_0/preview/blur"
+        ],
+        [
+          "image_0/edges"
+        ],
+        [
+          "image_0/mask"
+        ],
+        [
+          "image_0/preview"
+        ]
+      ]
+    },
+    {
+      "mode": "merge",
+      "chosen_plan": "merge",
+      "kernel_calls": 15,
+      "active_units": 30,
+      "execution_groups": 18,
+      "estimated_work": 224346.0,
+      "passed": true,
+      "output_digest": "e579829c8aff78f22750f10def278131e9170266d143c78a9733b907510cc1af",
+      "groups": [
+        [
+          "image_0"
+        ],
+        [
+          "image_1"
+        ],
+        [
+          "image_2"
+        ],
+        [
+          "image_0/edges/gray",
+          "image_0/mask/gray",
+          "image_0/preview/gray"
+        ],
+        [
+          "image_1/edges/gray",
+          "image_1/mask/gray",
+          "image_1/preview/gray"
+        ],
+        [
+          "image_2/edges/gray",
+          "image_2/mask/gray",
+          "image_2/preview/gray"
+        ],
+        [
+          "image_0/edges/blur",
+          "image_0/mask/blur",
+          "image_0/preview/blur"
+        ],
+        [
+          "image_1/edges/blur",
+          "image_1/mask/blur",
+          "image_1/preview/blur"
+        ],
+        [
+          "image_2/edges/blur",
+          "image_2/mask/blur",
+          "image_2/preview/blur"
+        ],
+        [
+          "image_0/edges"
+        ],
+        [
+          "image_0/mask"
+        ],
+        [
+          "image_0/preview"
+        ],
+        [
+          "image_1/edges"
+        ],
+        [
+          "image_1/mask"
+        ],
+        [
+          "image_1/preview"
+        ],
+        [
+          "image_2/edges"
+        ],
+        [
+          "image_2/mask"
+        ],
+        [
+          "image_2/preview"
+        ]
+      ]
+    },
+    {
+      "mode": "combined",
+      "chosen_plan": "scope+merge",
+      "kernel_calls": 5,
+      "active_units": 10,
+      "execution_groups": 6,
+      "estimated_work": 74860.0,
+      "passed": true,
+      "output_digest": "e579829c8aff78f22750f10def278131e9170266d143c78a9733b907510cc1af",
+      "groups": [
+        [
+          "image_0"
+        ],
+        [
+          "image_0/edges/gray",
+          "image_0/mask/gray",
+          "image_0/preview/gray"
+        ],
+        [
+          "image_0/edges/blur",
+          "image_0/mask/blur",
+          "image_0/preview/blur"
+        ],
+        [
+          "image_0/edges"
+        ],
+        [
+          "image_0/mask"
+        ],
+        [
+          "image_0/preview"
+        ]
+      ]
+    },
+    {
+      "mode": "auto",
+      "chosen_plan": "scope+merge",
+      "kernel_calls": 5,
+      "active_units": 10,
+      "execution_groups": 6,
+      "estimated_work": 74860.0,
+      "passed": true,
+      "output_digest": "e579829c8aff78f22750f10def278131e9170266d143c78a9733b907510cc1af",
+      "groups": [
+        [
+          "image_0"
+        ],
+        [
+          "image_0/edges/gray",
+          "image_0/mask/gray",
+          "image_0/preview/gray"
+        ],
+        [
+          "image_0/edges/blur",
+          "image_0/mask/blur",
+          "image_0/preview/blur"
+        ],
+        [
+          "image_0/edges"
+        ],
+        [
+          "image_0/mask"
+        ],
+        [
+          "image_0/preview"
+        ]
+      ]
+    }
+  ]
+}

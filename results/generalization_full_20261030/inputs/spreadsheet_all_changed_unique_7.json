@@ -1,0 +1,49 @@
+{
+  "domain": "spreadsheet",
+  "case": {
+    "name": "all_changed_unique",
+    "duplicate": false,
+    "changed": 1.0,
+    "warm_cache": true
+  },
+  "seed": 7,
+  "base_input_file": "inputs/spreadsheet_7_0.npz",
+  "base_input_sha256": "f6ebc937b8371164f1326dbff1c0b67aee71e5eea2033102092be48475dfa6d8",
+  "current_input_digest": "5639dcc365401d40f2f3451b40b92d4d1b5363658b7a6ce8854fc3960b0a5add",
+  "reference_output_digest": "aa1bf42f544ad820db27715d2d308ff497f51b296ac07a80b42e1fe998f740ae",
+  "initial_cache_timing": {
+    "prepare": 0.004653666983358562,
+    "planning": 3.5375007428228855e-05,
+    "execution": 0.0006575830047950149,
+    "online": 0.005346624995581806,
+    "validation": 1.2491364032030106e-07
+  },
+  "formulas": {
+    "Report_0_0": "sum((Revenue_0 - Expense_0) * 0.9) * 1 / 100.0",
+    "Report_1_0": "sum((Revenue_1 - Expense_1) * 0.9) * 1 / 100.0",
+    "Report_2_0": "sum((Revenue_2 - Expense_2) * 0.9) * 1 / 100.0",
+    "Report_3_0": "sum((Revenue_3 - Expense_3) * 0.9) * 1 / 100.0",
+    "Report_4_0": "sum((Revenue_4 - Expense_4) * 0.9) * 1 / 100.0",
+    "Report_5_0": "sum((Revenue_5 - Expense_5) * 0.9) * 1 / 100.0",
+    "Report_6_0": "sum((Revenue_6 - Expense_6) * 0.9) * 1 / 100.0",
+    "Report_7_0": "sum((Revenue_7 - Expense_7) * 0.9) * 1 / 100.0",
+    "Report_8_0": "sum((Revenue_8 - Expense_8) * 0.9) * 1 / 100.0",
+    "Report_9_0": "sum((Revenue_9 - Expense_9) * 0.9) * 1 / 100.0",
+    "Report_10_0": "sum((Revenue_10 - Expense_10) * 0.9) * 1 / 100.0",
+    "Report_11_0": "sum((Revenue_11 - Expense_11) * 0.9) * 1 / 100.0"
+  },
+  "outputs": [
+    "Report_0_0",
+    "Report_1_0",
+    "Report_2_0",
+    "Report_3_0",
+    "Report_4_0",
+    "Report_5_0",
+    "Report_6_0",
+    "Report_7_0",
+    "Report_8_0",
+    "Report_9_0",
+    "Report_10_0",
+    "Report_11_0"
+  ]
+}

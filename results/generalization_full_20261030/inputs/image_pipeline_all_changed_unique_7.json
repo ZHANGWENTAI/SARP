@@ -1,0 +1,30 @@
+{
+  "domain": "image_pipeline",
+  "case": {
+    "name": "all_changed_unique",
+    "duplicate": false,
+    "changed": 1.0,
+    "warm_cache": true
+  },
+  "seed": 7,
+  "base_input_file": "inputs/image_pipeline_7_0.npz",
+  "base_input_sha256": "a48633a8f5295abd73257ac63f04522804af83617a71b02a31e5921d75275817",
+  "current_input_digest": "0aef9af6b3e79c375a17ad90d8d7b93d8fd6ef3318579f461e3f806ab2f63fe1",
+  "reference_output_digest": "b8f844905d5980c7fe59a8718faac5c5dc7602cb5f11932e3ee7391fc984e33f",
+  "initial_cache_timing": {
+    "prepare": 0.0017939999233931303,
+    "planning": 1.3750046491622925e-05,
+    "execution": 0.0031031669350340962,
+    "online": 0.0049109169049188495,
+    "validation": 8.300412446260452e-08
+  },
+  "formulas": null,
+  "outputs": [
+    "image_0/edges",
+    "image_1/edges",
+    "image_2/edges",
+    "image_3/edges",
+    "image_4/edges",
+    "image_5/edges"
+  ]
+}

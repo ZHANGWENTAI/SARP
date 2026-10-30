@@ -1,0 +1,61 @@
+{
+  "domain": "spreadsheet",
+  "case": {
+    "name": "partial_update",
+    "duplicate": true,
+    "changed": 0.1,
+    "warm_cache": true
+  },
+  "seed": 7,
+  "base_input_file": "inputs/spreadsheet_7_1.npz",
+  "base_input_sha256": "73c7104008e5aa00a402ff1fa2d1feaff2667cf582f4030718955b677f1b7bfa",
+  "current_input_digest": "463dccc79d4a12653f0af720b67bbd1e6730ef4f724ed6c7fb7446d3ae328400",
+  "reference_output_digest": "33e5cf3c5722f2753135043d30cf0612a56a1330cc781a315fdb3abcc2a4420a",
+  "initial_cache_timing": {
+    "prepare": 0.0011725410586223006,
+    "planning": 4.116701893508434e-05,
+    "execution": 0.0003262079553678632,
+    "online": 0.0015399160329252481,
+    "validation": 1.25030055642128e-07
+  },
+  "formulas": {
+    "Report_0_0": "sum((Revenue_0 - Expense_0) * 0.9) * 1 / 100.0",
+    "Report_0_1": "sum((Revenue_0 - Expense_0) * 0.9) * 2 / 100.0",
+    "Report_0_2": "sum((Revenue_0 - Expense_0) * 0.9) * 3 / 100.0",
+    "Report_1_0": "sum((Revenue_1 - Expense_1) * 0.9) * 1 / 100.0",
+    "Report_1_1": "sum((Revenue_1 - Expense_1) * 0.9) * 2 / 100.0",
+    "Report_1_2": "sum((Revenue_1 - Expense_1) * 0.9) * 3 / 100.0",
+    "Report_2_0": "sum((Revenue_2 - Expense_2) * 0.9) * 1 / 100.0",
+    "Report_2_1": "sum((Revenue_2 - Expense_2) * 0.9) * 2 / 100.0",
+    "Report_2_2": "sum((Revenue_2 - Expense_2) * 0.9) * 3 / 100.0",
+    "Report_3_0": "sum((Revenue_3 - Expense_3) * 0.9) * 1 / 100.0",
+    "Report_3_1": "sum((Revenue_3 - Expense_3) * 0.9) * 2 / 100.0",
+    "Report_3_2": "sum((Revenue_3 - Expense_3) * 0.9) * 3 / 100.0",
+    "Report_4_0": "sum((Revenue_4 - Expense_4) * 0.9) * 1 / 100.0",
+    "Report_4_1": "sum((Revenue_4 - Expense_4) * 0.9) * 2 / 100.0",
+    "Report_4_2": "sum((Revenue_4 - Expense_4) * 0.9) * 3 / 100.0",
+    "Report_5_0": "sum((Revenue_5 - Expense_5) * 0.9) * 1 / 100.0",
+    "Report_5_1": "sum((Revenue_5 - Expense_5) * 0.9) * 2 / 100.0",
+    "Report_5_2": "sum((Revenue_5 - Expense_5) * 0.9) * 3 / 100.0"
+  },
+  "outputs": [
+    "Report_0_0",
+    "Report_0_1",
+    "Report_0_2",
+    "Report_1_0",
+    "Report_1_1",
+    "Report_1_2",
+    "Report_2_0",
+    "Report_2_1",
+    "Report_2_2",
+    "Report_3_0",
+    "Report_3_1",
+    "Report_3_2",
+    "Report_4_0",
+    "Report_4_1",
+    "Report_4_2",
+    "Report_5_0",
+    "Report_5_1",
+    "Report_5_2"
+  ]
+}

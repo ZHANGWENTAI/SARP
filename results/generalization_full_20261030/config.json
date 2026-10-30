@@ -1,0 +1,49 @@
+{
+  "seeds": [
+    7,
+    19,
+    31,
+    43,
+    59
+  ],
+  "repeats": 7,
+  "warmups": 2,
+  "regions": 12,
+  "rows": 65536,
+  "views": 5,
+  "images": 6,
+  "image_size": 192,
+  "cases": [
+    {
+      "name": "cold_repeated",
+      "duplicate": true,
+      "changed": 0.0,
+      "warm_cache": false
+    },
+    {
+      "name": "partial_update",
+      "duplicate": true,
+      "changed": 0.1,
+      "warm_cache": true
+    },
+    {
+      "name": "unchanged",
+      "duplicate": true,
+      "changed": 0.0,
+      "warm_cache": true
+    },
+    {
+      "name": "all_changed_unique",
+      "duplicate": false,
+      "changed": 1.0,
+      "warm_cache": true
+    }
+  ],
+  "modes": [
+    "reference",
+    "scope",
+    "merge",
+    "combined",
+    "auto"
+  ]
+}

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1080" viewBox="0 0 1400 1080" role="img" aria-labelledby="title">
+<title id="title">SARP 系统架构</title>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker></defs>
+<style>text{font-family:"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",Arial,sans-serif;fill:#172b4d} .muted{fill:#52657a} .edge{fill:none;stroke:#64748b;stroke-width:2.5;marker-end:url(#arrow)} </style>
+<rect width="100%" height="100%" fill="white"/>
+<text x="700" y="53" text-anchor="middle" font-size="34" font-weight="700" class="">SARP 系统架构</text>
+<text x="700" y="85" text-anchor="middle" font-size="22" font-weight="400" class="muted">Structure-Aware Reasoning Prototype</text>
+<rect x="40" y="115" width="1320" height="95" rx="12" fill="#edf4fc" stroke="#b7c8d9" stroke-width="2"/>
+<text x="700" y="150" text-anchor="middle" font-size="26" font-weight="700" class="">任务输入</text>
+<text x="700" y="187" text-anchor="middle" font-size="23" font-weight="400" class="">表格公式 · 图像流水线 · 动态图维护 · 逻辑查询训练 · 视频张量去噪</text>
+<path d="M 460 210 L 460 245" class="edge"/>
+<path d="M 1140 210 L 1140 245" class="edge"/>
+<rect x="40" y="250" width="840" height="110" rx="12" fill="#eef7f3" stroke="#9bc5b2" stroke-width="2"/>
+<text x="460" y="283" text-anchor="middle" font-size="25" font-weight="700" class="">声明式接入：Adapter.build()</text>
+<text x="460" y="317" text-anchor="middle" font-size="23" font-weight="400" class="">Graph + Operation</text>
+<text x="460" y="344" text-anchor="middle" font-size="21" font-weight="400" class="muted">输入、节点、依赖、算子及复用规则</text>
+<rect x="920" y="250" width="440" height="110" rx="12" fill="#fff5e9" stroke="#d7b98e" stroke-width="2"/>
+<text x="1140" y="283" text-anchor="middle" font-size="25" font-weight="700" class="">执行后端接入</text>
+<text x="1140" y="317" text-anchor="middle" font-size="23" font-weight="400" class="">Task + execute()</text>
+<text x="1140" y="344" text-anchor="middle" font-size="21" font-weight="400" class="muted">有环更新、训练及预算语义</text>
+<path d="M 460 360 L 460 400" class="edge"/>
+<rect x="40" y="405" width="840" height="105" rx="12" fill="#eef7f3" stroke="#9bc5b2" stroke-width="2"/>
+<text x="460" y="440" text-anchor="middle" font-size="25" font-weight="700" class="">计算图准备</text>
+<text x="460" y="473" text-anchor="middle" font-size="22" font-weight="400" class="">依赖排序 · 内容指纹 · 变化传播 · 输出依赖分析</text>
+<text x="460" y="499" text-anchor="middle" font-size="20" font-weight="400" class="muted">Session 保存有效结果与版本状态</text>
+<path d="M 460 510 L 460 550" class="edge"/>
+<path d="M 1140 360 L 1140 550" class="edge"/>
+<rect x="40" y="555" width="1320" height="145" rx="12" fill="#edf4fc" stroke="#b7c8d9" stroke-width="2"/>
+<text x="700" y="591" text-anchor="middle" font-size="26" font-weight="700" class="">方案规划：Planner</text>
+<text x="700" y="620" text-anchor="middle" font-size="21" font-weight="400" class="muted">按任务声明的能力生成候选方案</text>
+<rect x="180" y="638" width="260" height="42" rx="8" fill="#e2f0e8" stroke="#9bc5b2" stroke-width="2"/>
+<text x="310" y="667" text-anchor="middle" font-size="23" font-weight="700" class="">范围收缩</text>
+<rect x="570" y="638" width="260" height="42" rx="8" fill="#eee7f6" stroke="#b8a5d1" stroke-width="2"/>
+<text x="700" y="667" text-anchor="middle" font-size="23" font-weight="700" class="">节点合并</text>
+<rect x="960" y="638" width="260" height="42" rx="8" fill="#fff0dc" stroke="#d7b98e" stroke-width="2"/>
+<text x="1090" y="667" text-anchor="middle" font-size="23" font-weight="700" class="">预算分配</text>
+<path d="M 460 700 L 460 760" class="edge"/>
+<path d="M 1140 700 L 1140 760" class="edge"/>
+<text x="700" y="734" text-anchor="middle" font-size="22" font-weight="400" class="muted">合法性检查 → 代价比较 → 方案选择</text>
+<rect x="40" y="765" width="840" height="100" rx="12" fill="#eef7f3" stroke="#9bc5b2" stroke-width="2"/>
+<text x="460" y="802" text-anchor="middle" font-size="26" font-weight="700" class="">计算图执行器</text>
+<text x="460" y="838" text-anchor="middle" font-size="22" font-weight="400" class="">按执行范围和节点分组调用算子，维护缓存</text>
+<rect x="920" y="765" width="440" height="100" rx="12" fill="#fff5e9" stroke="#d7b98e" stroke-width="2"/>
+<text x="1140" y="802" text-anchor="middle" font-size="26" font-weight="700" class="">领域执行后端</text>
+<text x="1140" y="838" text-anchor="middle" font-size="22" font-weight="400" class="">处理任务特定的计算语义</text>
+<path d="M 460 865 L 460 910" class="edge"/>
+<path d="M 1140 865 L 1140 910" class="edge"/>
+<rect x="40" y="915" width="1320" height="100" rx="12" fill="#edf4fc" stroke="#b7c8d9" stroke-width="2"/>
+<text x="700" y="953" text-anchor="middle" font-size="26" font-weight="700" class="">结果与执行记录</text>
+<text x="700" y="988" text-anchor="middle" font-size="23" font-weight="400" class="">输出结果 · 算子计数 · 准备 / 规划 / 执行耗时 · 验证记录</text>
+<text x="700" y="1053" text-anchor="middle" font-size="21" font-weight="400" class="muted">声明式接入自动处理精确 DAG；预算方案和任务特定约束由相应后端提供。</text>
+</svg>
